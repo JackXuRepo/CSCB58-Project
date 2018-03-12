@@ -1,2 +1,2 @@
-# CSCB58-Project
+# Air Pong
 CSCB58 Winter 2018 UTSC
