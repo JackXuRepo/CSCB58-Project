@@ -20,7 +20,18 @@ Project Details
 Project Title: Air Pong
 
 Project Description:
-A Two-Dimensional game with two players. Each player controls a paddle which are located at opposite ends of the screen. The user controls each paddle by moving them either up or down along the range of their nets. The goal of this game is to score a goal inside the opposite player’s net. To do this, each player must prevent the ball from entering their net by hitting it with their paddle to reach the other player’s net. Whenever the player manages to get the ball inside the opponent’s net, they will gain 1 point. There are also randomly generated squares on the screen. Whenever a ball comes into contact with these squares, the last player that made contact with the ball gains 1 point. Each time the ball comes into contact with a paddle, it accelerates at a rate. A counter will start counting down, when the game starts. Once time is over, the player with the most points wins.
+A Two-Dimensional game with two players. Each player controls a paddle which
+are located at opposite ends of the screen. The user controls each paddle by
+moving them either up or down along the range of their nets. The goal of this
+game is to score a goal inside the opposite player’s net. To do this, each
+player must prevent the ball from entering their net by hitting it with their
+paddle to reach the other player’s net. Whenever the player manages to get the
+ball inside the opponent’s net, they will gain 1 point. There are also randomly
+generated squares on the screen. Whenever a ball comes into contact with these
+squares, the last player that made contact with the ball gains 1 point. Each
+time the ball comes into contact with a paddle, it accelerates at a rate. A
+counter will start counting down, when the game starts. Once time is over,
+the player with the most points wins.
 
 Video URL:
 
@@ -37,41 +48,71 @@ Proposal
 --------
 
 What do you plan to have completed by the end of the first lab session?:
-In the first lab session, we aim to begin drawing the basic shapes needed in our design, the walls, paddles, ball, and score adjuster. We will try to collect user input through keys to move the paddles, and have the ball initialized as well. Additionally, we plan to get some basic game logic working in the form of initializing score counters, and creating a reset switch.
+In the first lab session, we aim to begin drawing the basic shapes needed in
+our design, the walls, paddles, ball, and score adjuster. We will try to
+collect user input through keys to move the paddles, and have the ball
+initialized as well. Additionally, we plan to get some basic game logic
+working in the form of initializing score counters, and creating a reset
+switch.
 
 
 What do you plan to have completed by the end of the second lab session?:
-In the second lab session, we plan to implement score counting when the ball travels through the goal area, and outputting this score to the hex displays. Additionally, we will work on implementing logic for collisions between the ball and paddle, and the ball and the wall, and between the ball and the score adjuster power up. We will also generate the score adjuster power up to appear at a random time.
+In the second lab session, we plan to implement score counting when the ball
+travels through the goal area, and outputting this score to the hex displays.
+Additionally, we will work on implementing logic for collisions between the
+ball and paddle, and the ball and the wall, and between the ball and the score
+adjuster power up. We will also generate the score adjuster power up to appear
+at a random time.
 
 
 
 What do you plan to have completed by the end of the third lab session?:
-By the third lab session, we hope to have the program fully complete. In this session, we will focus on debugging and fixing any bugs that were missed on previous sessions.
+By the third lab session, we hope to have the program fully complete. In this
+session, we will focus on debugging and fixing any bugs that were missed on
+previous sessions.
 
 
-What is your backup plan if things don’t work out as planned?
-If we do not manage to complete what was planned for the lab sessions, we will book a study room through Makerspace each week in order to ensure the progression of the project keeps up with the schedule planned.
+What is your backup plan if things don’t work out as planned?:
+If we do not manage to complete what was planned for the lab sessions, we will
+book a study room through Makerspace each week in order to ensure the
+progression of the project keeps up with the schedule planned.
 
-What hardware will you need beyond the DE2 board 
-(be sure to e-mail Brian if it’s anything beyond the basics to make sure there’s enough to go around)
+What hardware will you need beyond the DE2 board?
+(be sure to e-mail Brian if it’s anything beyond the basics to make sure
+there’s enough to go around):
 We will be using a VGA Monitor in addition to the FPGA board.
 
 Motivations
 -----------
 How does this project relate to the material covered in CSCB58?:
-This project relates to the material covered in CSCB58 by making extensive use of hardware concepts covered in previous labs. Specifically, we will be using the hex displays and adders to calculate and output the score, as well as registers to store score information, and other game information. Additionally, we will use the clock and rate divider to control the speed of objects on screen, and to display this game on the monitor through VGA.
+This project relates to the material covered in CSCB58 by making extensive use
+of hardware concepts covered in previous labs. Specifically, we will be using
+the hex displays and adders to calculate and output the score, as well as
+registers to store score information, and other game information. Additionally,
+we will use the clock and rate divider to control the speed of objects on
+screen, and to display this game on the monitor through VGA.
 
-Why is this project interesting/cool (for CSCB58 students, and for non CSCB58 students?):
-For CSCB58 students, this project is interesting because we will be reimplementing many ideas covered in our previous labs and combining them together. (Rate divider, hex display, VGA drawing) 
-For non CSCB58 students, they may find this project interesting because this project is a game, and games are interesting and fun. Air Pong provides an interesting blend of the arcade games of Air Hockey, Pong, with the added twist of a score power up.
+Why is this project interesting/cool (for CSCB58 students, and for non CSCB58
+students?):
+For CSCB58 students, this project is interesting because we will be
+reimplementing many ideas covered in our previous labs and combining them
+together. (Rate divider, hex display, VGA drawing)
+For non CSCB58 students, they may find this project interesting because this
+project is a game, and games are interesting and fun. Air Pong provides an
+interesting blend of the arcade games of Air Hockey, Pong, with the added twist
+of a score power up.
 
 Why did you personally choose this project?:
-We chose this project personally, because we like gaming and thought it would be fun and interesting to apply what we learned in CSCB58 to the gaming genre. 
+We chose this project personally, because we like gaming and thought it would
+be fun and interesting to apply what we learned in CSCB58 to the gaming genre.
 
 Attributions
 ------------
-Provide a complete list of any external resources your project used (attributions should also be included in your
-code). 
+Provide a complete list of any external resources your project used
+(attributions should also be included in your
+code).:
+Core Pong and VGA logic: https://github.com/felixmo/Pong
+Custom PLL for video clock: https://github.com/chiusin97525/Game-Console
 
 Updates
 -------
