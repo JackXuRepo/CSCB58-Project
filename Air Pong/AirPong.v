@@ -42,6 +42,7 @@ THE SOFTWARE.
 `define batwidth   16
 `define batheight  128
 `define batspeed   10
+`define gap        10
 
 // top level module of the program.
 module AirPong(
@@ -94,6 +95,9 @@ module AirPong(
 	// Bats locations
 	wire [10:0] p1_y;
 	wire [10:0] p2_y;
+	// Walls
+	wire [10:0] wall_left_1;
+	wire [10:0] wall_left_2;
 	// Ball location
 	wire [10:0] ball_x;
 	wire [10:0] ball_y;
@@ -123,6 +127,8 @@ module AirPong(
 		.y(y),
 		.p1_y(p1_y),
 		.p2_y(p2_y),
+		.wall_left_1(wall_left_1),
+		.wall_left_2(wall_left_2),
 		.ball_on(ball_on),
 		.ball_x(ball_x),
 		.ball_y(ball_y),
@@ -179,6 +185,8 @@ module graphics(
 	y,
 	p1_y,
 	p2_y,
+	wall_left_1,
+	wall_left_2,
 	ball_on,
 	ball_x,
 	ball_y,
@@ -191,7 +199,7 @@ module graphics(
 	input clk;
 	input candraw;
 	input ball_on;
-	input [10:0] x, y, p1_y, p2_y, ball_x, ball_y;
+	input [10:0] x, y, p1_y, p2_y, ball_x, ball_y, wall_left_1, wall_left_2;
 	output reg [9:0] red, green, blue;
 	output vga_blank;
 	
@@ -201,15 +209,16 @@ module graphics(
 	always @(posedge clk) begin
 		if (candraw) begin
 			n_vga_blank <= 1'b0;
+			
 			// draw P1 (left) bat
-			if (x < `batwidth && y > p1_y && y < p1_y + `batheight) begin
+			if (x < `batwidth + `batwidth+`gap && x > `batwidth+`gap &&  y > p1_y && y < p1_y + `batheight) begin
 					// white bat
 					red <= 10'b1111111111;
 					green <= 10'b0000000000;
 					blue <= 10'b0000000000;
 			end
 			// draw P2 (right) bat
-			else if (x > `hc - `batwidth && y > p2_y && y < p2_y + `batheight) begin
+			else if (x > `hc - (`batwidth + `batwidth + `gap) && x < `hc - (`batwidth + `gap) && y > p2_y && y < p2_y + `batheight) begin
 					// white bat
 					red <= 10'b0000000000;
 					green <= 10'b0000000000;
@@ -222,11 +231,39 @@ module graphics(
 					green <= 10'b1111111111;
 					blue <= 10'b1111111111;
 			end
+			// Draw upper left wall
+			else if (x < `batwidth && y > 0 && y < `vc/3) begin
+					// pink wall
+					red <= 10'b1111111111;
+					green <= 10'b0000000000;
+					blue <= 10'b1111111111;
+			end
+			// Draw lower left wall
+			else if (x < `batwidth && y > (`vc/3 + `vc/3) && y < `vc) begin
+					// green wall
+					red <= 10'b0000000000;
+					green <= 10'b1111111111;
+					blue <= 10'b0000000000;
+			end
+			// Draw upper right wall
+			else if (x > `hc - `batwidth && y > 0 && y < `vc/3) begin
+					// pink wall
+					red <= 10'b1111111111;
+					green <= 10'b0000000000;
+					blue <= 10'b1111111111;
+			end
+			// Draw lower right wall
+			else if (x > `hc - `batwidth && y > (`vc/3 + `vc/3) && y < `vc) begin
+					// green wall
+					red <= 10'b0000000000;
+					green <= 10'b1111111111;
+					blue <= 10'b0000000000;
+			end
 			// black background
 			else begin
-					red <= 10'b0000000000;
-					green <= 10'b0000000000;
-					blue <= 10'b0000000000;
+					red <= 10'b0000011111;
+					green <= 10'b0000011111;
+					blue <= 10'b0000011111;
 			end
 		end else begin
 			// if we are not in the visible area, we must set the screen blank
@@ -442,7 +479,7 @@ module ballcollisions(
 			end
 			
 			// collision with P1 bat
-			if (ball_x <= `batwidth && ball_y + `ballsize >= p1_y && ball_y <= p1_y + `batheight) begin
+			if (ball_x <= `batwidth + `batwidth + `gap && ball_y + `ballsize >= p1_y && ball_y <= p1_y + `batheight) begin
 			
 				dir_x = 1;	// reverse direction
 		
@@ -456,11 +493,67 @@ module ballcollisions(
 				end
 			end
 			// collision with P2 bat
-			else if (ball_x >= `hc - `batwidth -`ballsize && ball_y + `ballsize <= p2_y + `batheight && ball_y >= p2_y) begin
+			else if (ball_x >= `hc - `batwidth - `batwidth- `gap -`ballsize && ball_y + `ballsize <= p2_y + `batheight && ball_y >= p2_y) begin
 				
 				dir_x = 0;	// reverse direction
 				
 				if (ball_y + `ballsize <= p2_y + (`batheight / 2)) begin
+					// collision with top half of p2 bat, go up
+					dir_y = 0;
+				end
+				else begin
+					// collision with bottom half of p bat, go down
+					dir_y = 1;
+				end
+			end
+			// collision with left upper wall
+			else if (ball_x <= `batwidth && ball_y + `ballsize <= `vc/3) begin
+			
+				dir_x = 1;	// reverse direction
+		
+				if (ball_y + `ballsize <= `vc/6) begin
+					// collision with top half of p1 bat, go up
+					dir_y = 0;
+				end
+				else begin
+					// collision with bottom half of p1 bat, go down
+					dir_y = 1;
+				end
+			end
+			// collision with left lower wall
+			else if (ball_x <= `batwidth && ball_y + `ballsize <= `vc && ball_y + `ballsize >= `vc * 2/3) begin
+			
+				dir_x = 1;	// reverse direction
+		
+				if (ball_y + `ballsize <= `vc * 5/6 && ball_y + `ballsize >= `vc * 4/6) begin
+					// collision with top half of p1 bat, go up
+					dir_y = 0;
+				end
+				else begin
+					// collision with bottom half of p1 bat, go down
+					dir_y = 1;
+				end
+			end
+			// collision with right upper wall
+			else if (ball_x >= `hc - `ballsize - `batwidth && ball_y + `ballsize <= `vc/3) begin
+			
+				dir_x = 1;	// reverse direction
+		
+				if (ball_y + `ballsize <= `vc/6) begin
+					// collision with top half of p1 bat, go up
+					dir_y = 0;
+				end
+				else begin
+					// collision with bottom half of p1 bat, go down
+					dir_y = 1;
+				end
+			end
+			// collision with right lower wall
+			else if (ball_x >= `hc - `ballsize - `batwidth && ball_y + `ballsize <= `vc && ball_y + `ballsize >= `vc * 2/3) begin
+			
+				dir_x = 1;	// reverse direction
+		
+				if (ball_y + `ballsize <= `vc * 5/6 && ball_y + `ballsize >= `vc * 4/6) begin
 					// collision with top half of p1 bat, go up
 					dir_y = 0;
 				end
