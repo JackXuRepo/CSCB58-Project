@@ -135,7 +135,8 @@ module AirPong(
 		.red(VGA_R),
 		.green(VGA_G),
 		.blue(VGA_B),
-		.vga_blank(VGA_BLANK)
+		.vga_blank(VGA_BLANK),
+        .pause(SW[0])
 		);
 	
 	// Game logic module
@@ -155,7 +156,9 @@ module AirPong(
 		.ball_y(ball_y),
 		.p1_score(p1_score),
 		.p2_score(p2_score),
-		.winner(winner)
+		.winner(winner),
+        .pause(SW[0]),
+        .multiplier(SW[1])
 		);
 
 	// REPLACE THIS
@@ -193,12 +196,14 @@ module graphics(
 	red, 
 	green, 
 	blue,
-	vga_blank
+	vga_blank,
+    pause
 	);
 
 	input clk;
 	input candraw;
 	input ball_on;
+    input pause;
 	input [10:0] x, y, p1_y, p2_y, ball_x, ball_y, wall_left_1, wall_left_2;
 	output reg [9:0] red, green, blue;
 	output vga_blank;
@@ -209,7 +214,14 @@ module graphics(
 	always @(posedge clk) begin
 		if (candraw) begin
 			n_vga_blank <= 1'b0;
-			
+            
+            // draw pause symbol when paused
+            if (pause && x > 500 && x < 550 && y > 500 && y < 550) begin
+                    // random square: FIX THIS
+					red <= 10'b1111111111;
+					green <= 10'b0000000000;
+					blue <= 10'b0000000000;
+			end
 			// draw P1 (left) bat
 			if (x < `batwidth + `batwidth+`gap && x > `batwidth+`gap &&  y > p1_y && y < p1_y + `batheight) begin
 					// white bat
@@ -332,13 +344,14 @@ module batpos(
 	reset,
 	speed,
 	value,
-	mode
+	mode,
+    pause
 	);
 
 	input clk;
 	input up, down;				// signal for counting up/down
 	input [4:0] speed;			// # of px to increment bats by
-	input reset, mode;
+	input reset, mode, pause;
 	output [10:0] value;		// max value is 1024 (px), 11 bits wide
 	
 	reg [10:0] value;
@@ -352,7 +365,7 @@ module batpos(
 			// go back to the middle
 			value <= `vc / 2;
 		end
-		else begin
+		else if (! pause) begin
 			if (up) begin
 				// prevent bat from going beyond upper bound of the screen
 				if ((value - speed) > `va) begin
@@ -373,7 +386,7 @@ module batpos(
 endmodule
 
 
-// Module with counters that determining the ball position
+// Module with counters that determine the ball position
 module ballpos(
 	clk,
 	reset,
@@ -382,12 +395,14 @@ module ballpos(
 	dir_y,		// 0 = UP, 1 = DOWN
 	value_x,
 	value_y,
-	mode
+	mode,
+    pause,
+    multiplier
 	);
 
 	input clk;
 	input [4:0] speed;					// # of px to increment bat by
-	input reset, mode;
+	input reset, mode, pause, multiplier;
 	input dir_x, dir_y;
 	output [10:0] value_x, value_y;		// max value is 1024 (px), 11 bits wide
 	
@@ -404,15 +419,15 @@ module ballpos(
 			value_x <= `hc / 2 - (`ballsize / 2);
 			value_y <= `va + 7;
 		end
-		else begin
+		else if (! pause) begin
 			// increment x
 			if (dir_x) begin
 				// right 
-				value_x <= value_x + speed;
+				value_x <= value_x + speed + multiplier;
 			end
 			else begin
 				// left
-				value_x <= value_x - speed;
+				value_x <= value_x - speed - multiplier;
 			end
 			
 			// increment y
@@ -535,9 +550,9 @@ module ballcollisions(
 				end
 			end
 			// collision with right upper wall
-			else if (ball_x >= `hc - `ballsize - `batwidth && ball_y + `ballsize <= `vc/3) begin
+			else if (ball_x + `ballsize >= `hc - `batwidth && ball_y + `ballsize <= `vc/3) begin
 			
-				dir_x = 1;	// reverse direction
+				dir_x = 0;	// reverse direction
 		
 				if (ball_y + `ballsize <= `vc/6) begin
 					// collision with top half of p1 bat, go up
@@ -549,9 +564,9 @@ module ballcollisions(
 				end
 			end
 			// collision with right lower wall
-			else if (ball_x >= `hc - `ballsize - `batwidth && ball_y + `ballsize <= `vc && ball_y + `ballsize >= `vc * 2/3) begin
+			else if (ball_x + `ballsize >= `hc - `batwidth && ball_y + `ballsize <= `vc && ball_y + `ballsize >= `vc * 2/3) begin
 			
-				dir_x = 1;	// reverse direction
+				dir_x = 0;	// reverse direction
 		
 				if (ball_y + `ballsize <= `vc * 5/6 && ball_y + `ballsize >= `vc * 4/6) begin
 					// collision with top half of p1 bat, go up
@@ -585,7 +600,9 @@ module gamelogic(
 	ball_y,
 	p1_score,
 	p2_score,
-	winner
+	winner,
+    pause,
+    multiplier
 	);
 	
 	input clock50;
@@ -593,6 +610,8 @@ module gamelogic(
 	input video_clock;
 	input start;
 	input p1_up, p1_down, p2_up, p2_down;
+    input pause;
+    input multiplier;
 	output [10:0] p1_y, p2_y;
 	output [10:0] ball_x, ball_y;
 	output ball_on;
@@ -689,7 +708,8 @@ module gamelogic(
 		.down(p1_down),
 		.reset(reset),
 		.speed(`batspeed),
-		.value(p1_y)
+		.value(p1_y),
+        .pause(pause)
 		);
 		
 	// Module for controlling player 2's bat
@@ -699,7 +719,8 @@ module gamelogic(
 		.down(p2_down),
 		.reset(reset),
 		.speed(`batspeed),
-		.value(p2_y)
+		.value(p2_y),
+        .pause(pause)
 		);
 		
 	// Ball collision detection module
@@ -723,7 +744,9 @@ module gamelogic(
 		.dir_x(dir_x),
 		.dir_y(dir_y),
 		.value_x(ball_x),
-		.value_y(ball_y)
+		.value_y(ball_y),
+        .pause(pause),
+        .multiplier(multiplier)
 		);
 
 endmodule
