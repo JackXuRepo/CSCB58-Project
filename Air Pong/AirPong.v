@@ -37,12 +37,15 @@ THE SOFTWARE.
 `define vd 1		// front porch
 
 // Ball and bat size & speed parameters
-`define ballsize   16
-`define ballspeed  3
-`define batwidth   16
-`define batheight  128
-`define batspeed   10
-`define gap        10
+`define ballsize    16
+`define ballspeed   3
+`define batwidth    16
+`define batheight   128
+`define batspeed    10
+`define gap         10
+`define pauseheight 256
+`define pausewidth  64
+`define pausegap    32
 
 // top level module of the program.
 module AirPong(
@@ -211,13 +214,6 @@ module graphics(
 		if (candraw) begin
 			n_vga_blank <= 1'b0;
             
-            // draw pause symbol when paused
-            if (pause && x > 500 && x < 550 && y > 500 && y < 550) begin
-                    // random square: FIX THIS
-					red <= 10'b1111111111;
-					green <= 10'b0000000000;
-					blue <= 10'b0000000000;
-			end
 			// draw P1 (left) bat
 			if (x < `batwidth + `batwidth+`gap && x > `batwidth+`gap &&  y > p1_y && y < p1_y + `batheight) begin
 					// white bat
@@ -305,6 +301,18 @@ module graphics(
 					red <= 10'b0000000000;
 					green <= 10'b1111111111;
 					blue <= 10'b0000000000;
+			end
+			// draw pause symbol when paused(pause condition is true)(left pause bar)
+            else if (pause && x > `hc/2 - `pausewidth - `pausegap && x < `hc/2 - `pausegap && y > `vc/2 - `pauseheight/2 && y < `vc/2 + `pauseheight/2) begin
+					red <= 10'b1111111111;
+					green <= 10'b1111111111;
+					blue <= 10'b1111111111;
+			end
+			// draw pause symbol when paused(pause condition is true)(right pause bar)
+            else if (pause && x > `hc/2 + `pausegap && x < `hc/2 + `pausewidth + `pausegap && y > `vc/2 - `pauseheight/2 && y < `vc/2 + `pauseheight/2) begin
+					red <= 10'b1111111111;
+					green <= 10'b1111111111;
+					blue <= 10'b1111111111;
 			end
 			// black background
 			else begin
