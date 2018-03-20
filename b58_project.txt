@@ -116,3 +116,32 @@ Custom PLL for video clock: https://github.com/chiusin97525/Game-Console
 
 Updates
 -------
+
+Week 1:
+New this lab:
+- Drew 4 walls (left-upper, left-lower, right-upper, right-lower) on VGA
+- Updated positioning of left and right paddles.
+- Updated ball collision logic for paddles to accomodate new positioning
+- Added ball collision logic for the walls.
+
+Bugs:
+- Upper-right wall has a possible bug in the collision logic for the lower section. Ball passes through it sometimes.
+
+
+
+Week 2:
+Fixed:
+- collision logic for right-upper and right-lower walls
+- removed unneeded wires
+
+Added:
+- Pause functionality (activated with SW[0])
+- Drew a pause icon
+- speed of the ball (horizontal) is increased when hitting a side wall.
+- started adding powerup functionality, as of now the current power ups are 
+being controlled through switches. (through SW[1])
+
+Bugs:
+- Experimented with ball colour changing, although the behaviour of colours
+are not as expected. (ball changes colour as it moves vertically)
+
