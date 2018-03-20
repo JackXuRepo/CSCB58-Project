@@ -390,17 +390,19 @@ module ballpos(
 	value_y,
 	mode,
     pause,
-    powerup
+    powerup,
+	powerup_x,
+	powerup_y
 	);
 
 	input clk;
 	input [4:0] speed;					// # of px to increment bat by
-	input reset, mode, pause, powerup;
+	input reset, mode, pause, powerup, powerup_x, powerup_y;
 	input dir_x, dir_y;
 	output [10:0] value_x, value_y;		// max value is 1024 (px), 11 bits wide
 	
 	reg [10:0] value_x, value_y;
-	reg multiplier;
+	reg [10:0] multiplier_x, multiplier_y;
 		
 	
 	
@@ -414,32 +416,52 @@ module ballpos(
 		if (reset || mode) begin
 			value_x <= `hc / 2 - (`ballsize / 2);
 			value_y <= `va + 7;
+			multiplier_x <= 0;
+			multiplier_y <= 0;
+			
 		end
 		else if (! pause) begin
 			// increment x
-			if(powerup == 4'b0001) begin
-				multiplier = 10'b0000000001;
+//			if(powerup == 4'b0001) begin
+//				multiplier = 10'b0000000001;
+//			end
+//			else begin
+//				multiplier = 10'b0000000000;
+//			end
+
+			// Increase horizontal speed
+			if(powerup_x == 1) begin
+				multiplier_x = 10'b0000000010;
 			end
 			else begin
-				multiplier = 10'b0000000000;
+				multiplier_x = 10'b0000000000;
 			end
+			
+			// increase vertical speed
+			if(powerup_y == 1) begin
+				multiplier_y = 10'b0000000010;
+			end
+			else begin
+				multiplier_y = 10'b0000000000;
+			end
+			
 			if (dir_x) begin
 				// right 
-				value_x <= value_x + speed + multiplier;
+				value_x <= value_x + speed + multiplier_x;
 			end
 			else begin
 				// left
-				value_x <= value_x - speed - multiplier;
+				value_x <= value_x - speed - multiplier_x;
 			end
 			
 			// increment y
 			if (dir_y) begin
 				// down
-				value_y <= value_y + speed;
+				value_y <= value_y + speed + multiplier_y;
 			end
 			else begin
 				// up
-				value_y <= value_y - speed;
+				value_y <= value_y - speed - multiplier_y;
 			end
 		end
 	end
@@ -458,18 +480,22 @@ module ballcollisions(
 	ball_y,
 	dir_x,
 	dir_y,
-	oob		// whether ball is out of bounds
+	oob,// whether ball is out of bounds
+	powerup_x_active,
+	powerup_y_active
 	);
 	
 	input clk, reset;
 	input [10:0] p1_y, p2_y, ball_x, ball_y;
-	output dir_x, dir_y, oob;
+	output dir_x, dir_y, oob, powerup_x_active, powerup_y_active;
 		
-	reg dir_x, dir_y, oob;
+	reg dir_x, dir_y, oob, powerup_x_active, powerup_y_active;
 	initial begin
 		dir_x <= 0;
 		dir_y <= 1;
 		oob <= 0;
+		powerup_x_active <= 0;
+		powerup_y_active <= 0;
 	end
 		
 	always @ (posedge clk) begin
@@ -493,13 +519,14 @@ module ballcollisions(
 			end
 			if (ball_y >= `vc - `ballsize) begin
 				dir_y = 0;
+				//powerup_y_active = 1;
 			end
 			
 			// collision with P1 bat
 			if (ball_x <= `batwidth + `batwidth + `gap && ball_y + `ballsize >= p1_y && ball_y <= p1_y + `batheight) begin
 			
 				dir_x = 1;	// reverse direction
-		
+				powerup_x_active = 0;
 				if (ball_y + `ballsize <= p1_y + (`batheight / 2)) begin
 					// collision with top half of p1 bat, go up
 					dir_y = 0;
@@ -513,7 +540,7 @@ module ballcollisions(
 			else if (ball_x >= `hc - `batwidth - `batwidth- `gap -`ballsize && ball_y + `ballsize <= p2_y + `batheight && ball_y >= p2_y) begin
 				
 				dir_x = 0;	// reverse direction
-				
+				powerup_x_active = 0;
 				if (ball_y + `ballsize <= p2_y + (`batheight / 2)) begin
 					// collision with top half of p2 bat, go up
 					dir_y = 0;
@@ -527,7 +554,7 @@ module ballcollisions(
 			else if (ball_x <= `batwidth && ball_y + `ballsize <= `vc/3) begin
 			
 				dir_x = 1;	// reverse direction
-		
+				powerup_x_active = 1;
 				if (ball_y + `ballsize <= `vc/6) begin
 					// collision with top half of p1 bat, go up
 					dir_y = 0;
@@ -541,7 +568,7 @@ module ballcollisions(
 			else if (ball_x <= `batwidth && ball_y + `ballsize <= `vc && ball_y + `ballsize >= `vc * 2/3) begin
 			
 				dir_x = 1;	// reverse direction
-		
+				powerup_x_active = 1;
 				if (ball_y + `ballsize <= `vc * 5/6 && ball_y + `ballsize >= `vc * 4/6) begin
 					// collision with top half of p1 bat, go up
 					dir_y = 0;
@@ -555,7 +582,7 @@ module ballcollisions(
 			else if (ball_x + `ballsize >= `hc - `batwidth && ball_y + `ballsize <= `vc/3) begin
 			
 				dir_x = 0;	// reverse direction
-		
+				powerup_x_active = 1;
 				if (ball_y + `ballsize <= `vc/6) begin
 					// collision with top half of p1 bat, go up
 					dir_y = 0;
@@ -569,7 +596,7 @@ module ballcollisions(
 			else if (ball_x + `ballsize >= `hc - `batwidth && ball_y + `ballsize <= `vc && ball_y + `ballsize >= `vc * 2/3) begin
 			
 				dir_x = 0;	// reverse direction
-		
+				powerup_x_active = 1;
 				if (ball_y + `ballsize <= `vc * 5/6 && ball_y + `ballsize >= `vc * 4/6) begin
 					// collision with top half of p1 bat, go up
 					dir_y = 0;
@@ -638,7 +665,8 @@ module gamelogic(
 	
 	wire dir_x;		// 0 = LEFT, 1 = RIGHT
 	wire dir_y;		// 0 = UP, 1 = DOWN
-	
+	wire powerup_x;
+	wire powerup_y;
 	wire outofbounds;
 	reg newround;
 	
@@ -735,7 +763,9 @@ module gamelogic(
 		.ball_y(ball_y),
 		.dir_x(dir_x),
 		.dir_y(dir_y),
-		.oob(outofbounds)
+		.oob(outofbounds),
+		.powerup_x_active(powerup_x),
+		.powerup_y_active(powerup_y)
 		);
 	
 	// Module with counters that determining the ball position
@@ -748,7 +778,9 @@ module gamelogic(
 		.value_x(ball_x),
 		.value_y(ball_y),
         .pause(pause),
-        .powerup(powerup)
+        .powerup(powerup),
+		.powerup_x(powerup_x),
+		.powerup_y(powerup_y)
 		);
 
 endmodule
