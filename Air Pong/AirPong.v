@@ -153,7 +153,7 @@ module AirPong(
 		.p2_score(p2_score),
 		.winner(winner),
         .pause(SW[0]),
-        .multiplier(SW[1])
+        .powerup({SW[4], SW[3], SW[2], SW[1]})
 		);
 
 	// REPLACE THIS
@@ -390,16 +390,19 @@ module ballpos(
 	value_y,
 	mode,
     pause,
-    multiplier
+    powerup
 	);
 
 	input clk;
 	input [4:0] speed;					// # of px to increment bat by
-	input reset, mode, pause, multiplier;
+	input reset, mode, pause, powerup;
 	input dir_x, dir_y;
 	output [10:0] value_x, value_y;		// max value is 1024 (px), 11 bits wide
 	
 	reg [10:0] value_x, value_y;
+	reg multiplier;
+		
+	
 	
 	// the initial position of the ball is at the top of the screen, in the middle,
 	initial begin
@@ -407,13 +410,19 @@ module ballpos(
 		value_y <= `va + 7;
 	end
 	
-	always @ (posedge clk or posedge reset or posedge mode) begin
+	always @ (posedge clk or posedge reset or posedge mode) begin	
 		if (reset || mode) begin
 			value_x <= `hc / 2 - (`ballsize / 2);
 			value_y <= `va + 7;
 		end
 		else if (! pause) begin
 			// increment x
+			if(powerup == 4'b0001) begin
+				multiplier = 10'b0000000010;
+			end
+			else begin
+				multiplier = 10'b0000000000;
+			end
 			if (dir_x) begin
 				// right 
 				value_x <= value_x + speed + multiplier;
@@ -595,7 +604,7 @@ module gamelogic(
 	p2_score,
 	winner,
     pause,
-    multiplier
+    powerup
 	);
 	
 	input clock50;
@@ -604,7 +613,7 @@ module gamelogic(
 	input start;
 	input p1_up, p1_down, p2_up, p2_down;
     input pause;
-    input multiplier;
+    input powerup;
 	output [10:0] p1_y, p2_y;
 	output [10:0] ball_x, ball_y;
 	output ball_on;
@@ -739,7 +748,7 @@ module gamelogic(
 		.value_x(ball_x),
 		.value_y(ball_y),
         .pause(pause),
-        .multiplier(multiplier)
+        .powerup(powerup)
 		);
 
 endmodule
