@@ -95,9 +95,6 @@ module AirPong(
 	// Bats locations
 	wire [10:0] p1_y;
 	wire [10:0] p2_y;
-	// Walls
-	wire [10:0] wall_left_1;
-	wire [10:0] wall_left_2;
 	// Ball location
 	wire [10:0] ball_x;
 	wire [10:0] ball_y;
@@ -127,8 +124,6 @@ module AirPong(
 		.y(y),
 		.p1_y(p1_y),
 		.p2_y(p2_y),
-		.wall_left_1(wall_left_1),
-		.wall_left_2(wall_left_2),
 		.ball_on(ball_on),
 		.ball_x(ball_x),
 		.ball_y(ball_y),
@@ -188,8 +183,6 @@ module graphics(
 	y,
 	p1_y,
 	p2_y,
-	wall_left_1,
-	wall_left_2,
 	ball_on,
 	ball_x,
 	ball_y,
