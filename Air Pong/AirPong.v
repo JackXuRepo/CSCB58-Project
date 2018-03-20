@@ -418,7 +418,7 @@ module ballpos(
 		else if (! pause) begin
 			// increment x
 			if(powerup == 4'b0001) begin
-				multiplier = 10'b0000000010;
+				multiplier = 10'b0000000001;
 			end
 			else begin
 				multiplier = 10'b0000000000;
