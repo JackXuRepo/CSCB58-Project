@@ -197,7 +197,7 @@ module graphics(
 	input candraw;
 	input ball_on;
     input pause;
-	input [10:0] x, y, p1_y, p2_y, ball_x, ball_y, wall_left_1, wall_left_2;
+	input [10:0] x, y, p1_y, p2_y, ball_x, ball_y;
 	output reg [9:0] red, green, blue;
 	output vga_blank;
 	
