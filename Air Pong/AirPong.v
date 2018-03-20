@@ -211,13 +211,6 @@ module graphics(
 		if (candraw) begin
 			n_vga_blank <= 1'b0;
             
-            // draw pause symbol when paused(pause condition is true)
-            if (pause && x > `hc/2 - `pausewidth - `pausegap && x < `hc/2 - `pausegap && y > `vc/2 - `pauseheight/2 && y < `vc/2 + `pauseheight/2) begin
-                    // random square: FIX THIS
-					red <= 10'b1111111111;
-					green <= 10'b1111111111;
-					blue <= 10'b0000000000;
-			end
 			// draw P1 (left) bat
 			if (x < `batwidth + `batwidth+`gap && x > `batwidth+`gap &&  y > p1_y && y < p1_y + `batheight) begin
 					// white bat
@@ -266,6 +259,18 @@ module graphics(
 					red <= 10'b0000000000;
 					green <= 10'b1111111111;
 					blue <= 10'b0000000000;
+			end
+			// draw pause symbol when paused(pause condition is true)(left pause bar)
+            else if (pause && x > `hc/2 - `pausewidth - `pausegap && x < `hc/2 - `pausegap && y > `vc/2 - `pauseheight/2 && y < `vc/2 + `pauseheight/2) begin
+					red <= 10'b1111111111;
+					green <= 10'b1111111111;
+					blue <= 10'b1111111111;
+			end
+			// draw pause symbol when paused(pause condition is true)(right pause bar)
+            else if (pause && x > `hc/2 + `pausegap && x < `hc/2 + `pausewidth + `pausegap && y > `vc/2 - `pauseheight/2 && y < `vc/2 + `pauseheight/2) begin
+					red <= 10'b1111111111;
+					green <= 10'b1111111111;
+					blue <= 10'b1111111111;
 			end
 			// black background
 			else begin
