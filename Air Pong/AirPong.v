@@ -193,28 +193,6 @@ module AirPong(
 
 endmodule
 
-module buttonLights(
-	p1_up_key,
-	p1_down_key,
-	p2_up_key,
-	p2_down_key,
-	p1_up_light,
-	p1_down_light,
-	p2_up_light,
-	p2_down_light
-	);
-	
-	input p1_up_key, p1_down_key, p2_up_key, p2_down_key;
-	output p1_up_light, p1_down_light, p2_up_light, p2_down_light;
-	
-	assign p1_up_light = p1_up_key;
-	assign p1_down_light = p1_down_key;
-	assign p2_up_light = p2_up_key;
-	assign p2_down_light = p2_down_key;
-	
-endmodule
-
-
 // Module that renders on-screen 
 // Draws objects pixel by pixel
 module graphics(
@@ -935,4 +913,25 @@ module sevenseg(seg0, seg1, seg2, seg3, seg4, seg5, seg6, seg7, score_p1, score_
 		seg0 = 7'b1111111;
 	end
 
+endmodule
+
+module buttonLights(
+	p1_up_key,
+	p1_down_key,
+	p2_up_key,
+	p2_down_key,
+	p1_up_light,
+	p1_down_light,
+	p2_up_light,
+	p2_down_light
+	);
+	
+	input p1_up_key, p1_down_key, p2_up_key, p2_down_key;
+	output p1_up_light, p1_down_light, p2_up_light, p2_down_light;
+	
+	assign p1_up_light = p1_up_key;
+	assign p1_down_light = p1_down_key;
+	assign p2_up_light = p2_up_key;
+	assign p2_down_light = p2_down_key;
+	
 endmodule
