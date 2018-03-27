@@ -362,7 +362,7 @@ module graphics(
 					blue <= 10'b1111111111;
 			end
             // draw the letter "W" for win. (right bar part)
-            else if (winner > 0 && x > 'hc/2 - `letterWidth*2 && x < 'hc/2 - `letterWidth && y > `roofMargin && y < `roofMargin + `letterHeight2) begin
+            else if (winner > 0 && x > 'hc/2 - `letterWidth*2 && x < `hc/2 - `letterWidth && y > `roofMargin && y < `roofMargin + `letterHeight2) begin
 					red <= 10'b1111111111;
 					green <= 10'b1111111111;
 					blue <= 10'b1111111111;
