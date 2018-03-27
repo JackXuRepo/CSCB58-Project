@@ -63,6 +63,7 @@ module AirPong(
 	VGA_SYNC,
 	TD_RESET,
 	LEDR,
+    LEDG,
 	HEX0,
 	HEX1,
 	HEX2,
@@ -79,6 +80,7 @@ module AirPong(
 	output VGA_CLK, VGA_BLANK, VGA_HS, VGA_VS, VGA_SYNC;
 	output TD_RESET;
 	output [17:0] LEDR;
+	output [7:0] LEDG;
 	output [6:0] HEX0, HEX1, HEX2, HEX3, HEX4, HEX5, HEX6, HEX7;
 
 	wire video_clock;
@@ -176,7 +178,42 @@ module AirPong(
 		.winner(winner)
 		);
 
+	// lights LEDs in front of keys to confirm to user that their key input
+	// was received
+	buttonLights bl(
+		.p1_up_key(~KEY[3]),
+		.p1_down_key(~KEY[2]),
+		.p2_up_key(~KEY[1]),
+		.p2_down_key(~KEY[0]),
+		.p1_up_light(LEDG[7]),
+		.p1_down_light(LEDG[5]),
+		.p2_up_light(LEDG[2]),
+		.p2_down_light(LEDG[0])
+	);
+
 endmodule
+
+module buttonLights(
+	p1_up_key,
+	p1_down_key,
+	p2_up_key,
+	p2_down_key,
+	p1_up_light,
+	p1_down_light,
+	p2_up_light,
+	p2_down_light
+	);
+	
+	input p1_up_key, p1_down_key, p2_up_key, p2_down_key;
+	output p1_up_light, p1_down_light, p2_up_light, p2_down_light;
+	
+	assign p1_up_light = p1_up_key;
+	assign p1_down_light = p1_down_key;
+	assign p2_up_light = p2_up_key;
+	assign p2_down_light = p2_down_key;
+	
+endmodule
+
 
 // Module that renders on-screen 
 // Draws objects pixel by pixel
