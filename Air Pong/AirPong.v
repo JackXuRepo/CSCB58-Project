@@ -43,9 +43,15 @@ THE SOFTWARE.
 `define batheight   128
 `define batspeed    10
 `define gap         10
-`define pauseheight 256
-`define pausewidth  64
-`define pausegap    32
+
+// constants for our graphics
+`define pauseheight   256
+`define pausewidth    64
+`define pausegap      32
+`define letterheight  192
+`define letterwidth   48
+`define letterheight2 144
+`define roofmargin	  144
 
 // top level module of the program.
 module AirPong(
@@ -135,7 +141,8 @@ module AirPong(
 		.blue(VGA_B),
 		.vga_blank(VGA_BLANK),
         .pause(SW[0]),
-		.powerup({SW[4], SW[3], SW[2], SW[1]})
+		.powerup({SW[4], SW[3], SW[2], SW[1]}),
+		.winner(winner)
 		);
 	
 	// Game logic module
@@ -195,7 +202,8 @@ module graphics(
 	blue,
 	vga_blank,
     pause,
-	powerup
+	powerup,
+	winner
 	);
 
 	input clk;
@@ -203,6 +211,7 @@ module graphics(
 	input ball_on;
 	input powerup;
     input pause;
+    input [1:0] winner;
 	input [10:0] x, y, p1_y, p2_y, ball_x, ball_y;
 	output reg [9:0] red, green, blue;
 	output vga_blank;
@@ -314,6 +323,42 @@ module graphics(
 					green <= 10'b1111111111;
 					blue <= 10'b1111111111;
 			end
+			
+			// draw the letter "W" for win. (bottom part)
+			else if (winner > 0 && x > `hc/2 - `letterwidth*7 && x < `hc/2 - `letterwidth && y > `roofmargin + `letterheight2 && y < `roofmargin + `letterheight) begin
+					red <= 10'b1111111111;
+					green <= 10'b1111111111;
+					blue <= 10'b1111111111;
+			end
+			
+			// draw the letter "W" for win. (left bar part)
+			else if (winner > 0 && x > `hc/2 - `letterwidth*7 && x < `hc/2 - `letterwidth*6 && y > `roofmargin && y < `roofmargin + `letterheight2) begin
+					red <= 10'b1111111111;
+					green <= 10'b1111111111;
+					blue <= 10'b1111111111;
+			end
+			
+			// draw the letter "W" for win. (middle bar part)
+			else if (winner > 0 && x > `hc/2 - `letterwidth*5 && x < `hc/2 - `letterwidth*4 && y > `roofmargin && y < `roofmargin + `letterheight2) begin
+			        red <= 10'b1111111111;
+                    green <= 10'b1111111111;
+                    blue <= 10'b1111111111;
+			end
+            // draw the letter "W" for win. (right bar part)
+            else if (winner > 0 && x > 'hc/2 - `letterwidth*3 && x < 'hc/2 - `letterwidth*2 && y > `roofmargin && y < `roofmargin + `letterheight2) begin
+                    red <= 10'b1111111111;
+                    green <= 10'b1111111111;
+                    blue <= 10'b1111111111;
+            end			
+			
+			// draw the letter 'I' for win.
+			else if (winner > 0 && x > `hc/2 - `letterwidth/2 && x < `hc/2 + `letterwidth/2 && y > `roofmargin && y < `roofmargin + `letterheight) begin
+					red <= 10'b1111111111;
+					green <= 10'b1111111111;
+					blue <= 10'b1111111111;
+			end
+			
+			
 			// black background
 			else begin
 //					red <= 10'b0000011111;
