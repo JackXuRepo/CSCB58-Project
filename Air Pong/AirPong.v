@@ -50,7 +50,7 @@ THE SOFTWARE.
 `define pausegap      32
 `define letterheight  192
 `define letterwidth   48
-`define letterheight2 144
+`define letterheight2 144 // height for shorter pieces
 `define roofmargin	  144
 
 // top level module of the program.
@@ -325,27 +325,27 @@ module graphics(
 			end
 			
 			// draw the letter "W" for win. (bottom part)
-			else if (winner > 0 && x > `hc/2 - `letterwidth*7 && x < `hc/2 - `letterwidth && y > `roofmargin + `letterheight2 && y < `roofmargin + `letterheight) begin
+			else if (winner > 0 && x > `hc/2 - `letterwidth*6 && x < `hc/2 - `letterwidth && y > `roofmargin + `letterheight2 && y < `roofmargin + `letterheight) begin
 					red <= 10'b1111111111;
 					green <= 10'b1111111111;
 					blue <= 10'b1111111111;
 			end
 			
 			// draw the letter "W" for win. (left bar part)
-			else if (winner > 0 && x > `hc/2 - `letterwidth*7 && x < `hc/2 - `letterwidth*6 && y > `roofmargin && y < `roofmargin + `letterheight2) begin
+			else if (winner > 0 && x > `hc/2 - `letterwidth*6 && x < `hc/2 - `letterwidth*5 && y > `roofmargin && y < `roofmargin + `letterheight2) begin
 					red <= 10'b1111111111;
 					green <= 10'b1111111111;
 					blue <= 10'b1111111111;
 			end
 			
 			// draw the letter "W" for win. (middle bar part)
-			else if (winner > 0 && x > `hc/2 - `letterwidth*5 && x < `hc/2 - `letterwidth*4 && y > `roofmargin && y < `roofmargin + `letterheight2) begin
+			else if (winner > 0 && x > `hc/2 - `letterwidth*4 && x < `hc/2 - `letterwidth*3 && y > `roofmargin && y < `roofmargin + `letterheight2) begin
 			        red <= 10'b1111111111;
                     green <= 10'b1111111111;
                     blue <= 10'b1111111111;
 			end
             // draw the letter "W" for win. (right bar part)
-            else if (winner > 0 && x > 'hc/2 - `letterwidth*3 && x < 'hc/2 - `letterwidth*2 && y > `roofmargin && y < `roofmargin + `letterheight2) begin
+            else if (winner > 0 && x > 'hc/2 - `letterwidth*2 && x < 'hc/2 - `letterwidth*1 && y > `roofmargin && y < `roofmargin + `letterheight2) begin
                     red <= 10'b1111111111;
                     green <= 10'b1111111111;
                     blue <= 10'b1111111111;
@@ -353,6 +353,27 @@ module graphics(
 			
 			// draw the letter 'I' for win.
 			else if (winner > 0 && x > `hc/2 - `letterwidth/2 && x < `hc/2 + `letterwidth/2 && y > `roofmargin && y < `roofmargin + `letterheight) begin
+					red <= 10'b1111111111;
+					green <= 10'b1111111111;
+					blue <= 10'b1111111111;
+			end
+
+			// draw the letter 'N' for win. (the left bar part)
+			else if (winner > 0 && x > `hc/2 + `letterwidth && x < `hc/2 + `letterwidth*2 && y > `roofmargin + `letterwidth && y < `roofmargin + `letterheight) begin
+					red <= 10'b1111111111;
+					green <= 10'b1111111111;
+					blue <= 10'b1111111111;
+			end
+
+			// draw the letter 'N' for win. (the right bar part)
+			else if (winner > 0 && x > `hc/2 + `letterwidth*3 && x < `hc/2 + `letterwidth*4 && y > `roofmargin + `letterwidth && y < `roofmargin + `letterheight) begin
+					red <= 10'b1111111111;
+					green <= 10'b1111111111;
+					blue <= 10'b1111111111;
+			end
+
+			// draw the letter 'N' for win. (the top bar part)
+			else if (winner > 0 && x > `hc/2 + `letterwidth && x < `hc/2 + `letterwidth*4 && y > `roofmargin && y < `roofmargin + `letterwidth) begin
 					red <= 10'b1111111111;
 					green <= 10'b1111111111;
 					blue <= 10'b1111111111;
