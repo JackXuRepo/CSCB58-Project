@@ -101,6 +101,11 @@ module AirPong(
 	// Ball location
 	wire [10:0] ball_x;
 	wire [10:0] ball_y;
+	// Power up locations
+	wire [10:0] powerup_x;
+	wire [10:0] powerup_y;
+	wire [10:0] temp;
+	//wire [10:0] random_power_y;
 
 	// Scores
 	wire [3:0] p1_score;
@@ -135,7 +140,9 @@ module AirPong(
 		.blue(VGA_B),
 		.vga_blank(VGA_BLANK),
         .pause(SW[0]),
-		.powerup({SW[4], SW[3], SW[2], SW[1]})
+		.powerup({SW[4], SW[3], SW[2], SW[1]}),
+		.powerup_x(powerup_x),
+		.powerup_y(powerup_y)
 		);
 	
 	// Game logic module
@@ -156,9 +163,19 @@ module AirPong(
 		.p1_score(p1_score),
 		.p2_score(p2_score),
 		.winner(winner),
-        .pause(SW[0]),
-        .powerup({SW[4], SW[3], SW[2], SW[1]})
+      .pause(SW[0]),
+      .powerup({SW[4], SW[3], SW[2], SW[1]})
 		);
+	
+	// "Random generator"
+	randomgen rd(
+		.clk(video_clock),
+		.rand_x(powerup_x),
+		.rand_y(powerup_y),
+		.rand_val(temp)
+		);
+		
+		
 
 	// REPLACE THIS
 	// Module to output info to the seven-segment displays
@@ -194,15 +211,18 @@ module graphics(
 	green, 
 	blue,
 	vga_blank,
-    pause,
-	powerup
+   pause,
+	powerup,
+	powerup_x,
+	powerup_y
 	);
 
 	input clk;
 	input candraw;
 	input ball_on;
 	input powerup;
-    input pause;
+	input powerup_x, powerup_y;
+   input pause;
 	input [10:0] x, y, p1_y, p2_y, ball_x, ball_y;
 	output reg [9:0] red, green, blue;
 	output vga_blank;
@@ -303,16 +323,21 @@ module graphics(
 					blue <= 10'b0000000000;
 			end
 			// draw pause symbol when paused(pause condition is true)(left pause bar)
-            else if (pause && x > `hc/2 - `pausewidth - `pausegap && x < `hc/2 - `pausegap && y > `vc/2 - `pauseheight/2 && y < `vc/2 + `pauseheight/2) begin
+         else if (pause && x > `hc/2 - `pausewidth - `pausegap && x < `hc/2 - `pausegap && y > `vc/2 - `pauseheight/2 && y < `vc/2 + `pauseheight/2) begin
 					red <= 10'b1111111111;
 					green <= 10'b1111111111;
 					blue <= 10'b1111111111;
 			end
 			// draw pause symbol when paused(pause condition is true)(right pause bar)
-            else if (pause && x > `hc/2 + `pausegap && x < `hc/2 + `pausewidth + `pausegap && y > `vc/2 - `pauseheight/2 && y < `vc/2 + `pauseheight/2) begin
+         else if (pause && x > `hc/2 + `pausegap && x < `hc/2 + `pausewidth + `pausegap && y > `vc/2 - `pauseheight/2 && y < `vc/2 + `pauseheight/2) begin
 					red <= 10'b1111111111;
 					green <= 10'b1111111111;
 					blue <= 10'b1111111111;
+			end
+			else if(x < powerup_x + 5 && x > powerup_x - 5 && y < powerup_y + 5 && y > powerup ) begin
+					red <= 10'b0000000000;
+					green <= 10'b1111111111;
+					blue <= 10'b0000000000;
 			end
 			// black background
 			else begin
@@ -382,7 +407,51 @@ module vga(
 		
 		startframe <= (h == 11'd0) && (v == 11'd0);
 	end
-endmodule 
+endmodule
+
+
+module randomgen(
+	clk,
+	rand_x,
+	rand_y,
+	rand_val
+	);
+	
+	input clk;
+	wire cycles;
+	output[10:0] rand_x, rand_y, rand_val;
+	reg[10:0] rand_x, rand_y, rand_val, toggle;
+	
+	always @(posedge clk) begin
+		if(rand_val == 16) begin
+			rand_val = 1;
+		end
+		else begin
+			rand_val = rand_val + 1;
+		end
+		
+		if(rand_x >= `hc * (3/4) && toggle) begin
+			rand_x <= `hc * (1/4);
+		end
+		else if (toggle) begin
+			rand_x <= rand_x + rand_val;
+			toggle <= ~toggle;
+		end
+		
+		if(rand_y >= `vc) begin
+			toggle <= ~toggle;
+			rand_y <= 0;
+		end
+		else begin
+			rand_y <= rand_y + 4;
+		end
+	end
+	
+	//always @(negedge clk) begin
+		
+	
+endmodule
+	
 
 
 // Counter for incrementing/decrementing bat position within bounds of screen
@@ -394,7 +463,7 @@ module batpos(
 	speed,
 	value,
 	mode,
-    pause
+   pause
 	);
 
 	input clk;
@@ -447,12 +516,12 @@ module ballpos(
 	mode,
     pause,
     powerup,
-	powerup_x
+	speed_mod_x
 	);
 
 	input clk;
 	input [4:0] speed;					// # of px to increment bat by
-	input reset, mode, pause, powerup, powerup_x;
+	input reset, mode, pause, powerup, speed_mod_x;
 	input dir_x, dir_y;
 	output [10:0] value_x, value_y;		// max value is 1024 (px), 11 bits wide
 	
@@ -486,7 +555,7 @@ module ballpos(
 			end
 
 			// Increase horizontal speed
-			if(powerup_x == 1) begin
+			if(speed_mod_x == 1) begin
 				multiplier_x = 10'b0000000010;
 			end
 			else begin
@@ -530,14 +599,15 @@ module ballcollisions(
 	dir_x,
 	dir_y,
 	oob,// whether ball is out of bounds
-	wall_speed_x_active
+	wall_speed_x_active,
+	last_hit
 	);
 	
 	input clk, reset;
 	input [10:0] p1_y, p2_y, ball_x, ball_y;
-	output dir_x, dir_y, oob, wall_speed_x_active;
+	output dir_x, dir_y, oob, wall_speed_x_active, last_hit;
 		
-	reg dir_x, dir_y, oob, wall_speed_x_active;
+	reg dir_x, dir_y, oob, wall_speed_x_active, last_hit;
 	initial begin
 		dir_x <= 0;
 		dir_y <= 1;
@@ -570,7 +640,7 @@ module ballcollisions(
 			
 			// collision with P1 bat
 			if (ball_x <= `batwidth + `batwidth + `gap && ball_y + `ballsize >= p1_y && ball_y <= p1_y + `batheight) begin
-			
+				last_hit = 0;
 				dir_x = 1;	// reverse direction
 				wall_speed_x_active = 1;
 				if (ball_y + `ballsize <= p1_y + (`batheight / 2)) begin
@@ -584,7 +654,7 @@ module ballcollisions(
 			end
 			// collision with P2 bat
 			else if (ball_x >= `hc - `batwidth - `batwidth- `gap -`ballsize && ball_y + `ballsize <= p2_y + `batheight && ball_y >= p2_y) begin
-				
+				last_hit = 1;
 				dir_x = 0;	// reverse direction
 				wall_speed_x_active = 1;
 				if (ball_y + `ballsize <= p2_y + (`batheight / 2)) begin
@@ -676,8 +746,8 @@ module gamelogic(
 	p1_score,
 	p2_score,
 	winner,
-    pause,
-    powerup
+   pause,
+   powerup
 	);
 	
 	input clock50;
@@ -685,8 +755,8 @@ module gamelogic(
 	input video_clock;
 	input start;
 	input p1_up, p1_down, p2_up, p2_down;
-    input pause;
-    input powerup;
+   input pause;
+   input powerup;
 	output [10:0] p1_y, p2_y;
 	output [10:0] ball_x, ball_y;
 	output ball_on;
@@ -711,9 +781,10 @@ module gamelogic(
 	
 	wire dir_x;		// 0 = LEFT, 1 = RIGHT
 	wire dir_y;		// 0 = UP, 1 = DOWN
-	wire powerup_x;
+	wire speed_mod_x;
 	wire outofbounds;
 	reg newround;
+	wire last_hit;
 	
 	reg [25:0] count_sec;
 	reg [1:0] count_secs;
@@ -809,7 +880,8 @@ module gamelogic(
 		.dir_x(dir_x),
 		.dir_y(dir_y),
 		.oob(outofbounds),
-		.wall_speed_x_active(powerup_x)
+		.wall_speed_x_active(speed_mod_x),
+		.last_hit(last_hit)
 		);
 	
 	// Module with counters that determining the ball position
@@ -823,7 +895,7 @@ module gamelogic(
 		.value_y(ball_y),
         .pause(pause),
         .powerup(powerup),
-		.powerup_x(powerup_x)
+		.speed_mod_x(speed_mod_x)
 		);
 
 endmodule
