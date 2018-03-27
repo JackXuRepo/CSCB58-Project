@@ -185,8 +185,8 @@ module AirPong(
 		.p1_down_key(~KEY[2]),
 		.p2_up_key(~KEY[1]),
 		.p2_down_key(~KEY[0]),
-		.p1_up_light(LEDG[7]),
-		.p1_down_light(LEDG[5]),
+		.p1_up_light(LEDG[6]),
+		.p1_down_light(LEDG[4]),
 		.p2_up_light(LEDG[2]),
 		.p2_down_light(LEDG[0])
 	);
