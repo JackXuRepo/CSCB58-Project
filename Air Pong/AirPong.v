@@ -466,8 +466,6 @@ module graphics(
 					blue <= 10'b1111111111;
 			end
 
-
-			
 			// black background
 			else begin
 //					red <= 10'b0000011111;
