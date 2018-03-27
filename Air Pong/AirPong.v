@@ -408,49 +408,6 @@ module vga(
 		startframe <= (h == 11'd0) && (v == 11'd0);
 	end
 endmodule
-
-
-module randomgen(
-	clk,
-	rand_x,
-	rand_y,
-	rand_val
-	);
-	
-	input clk;
-	wire cycles;
-	output[10:0] rand_x, rand_y, rand_val;
-	reg[10:0] rand_x, rand_y, rand_val, toggle;
-	
-	always @(posedge clk) begin
-		if(rand_val == 16) begin
-			rand_val = 1;
-		end
-		else begin
-			rand_val = rand_val + 1;
-		end
-		
-		if(rand_x >= `hc * (3/4) && toggle) begin
-			rand_x <= `hc * (1/4);
-		end
-		else if (toggle) begin
-			rand_x <= rand_x + rand_val;
-			toggle <= ~toggle;
-		end
-		
-		if(rand_y >= `vc) begin
-			toggle <= ~toggle;
-			rand_y <= 0;
-		end
-		else begin
-			rand_y <= rand_y + 4;
-		end
-	end
-	
-	//always @(negedge clk) begin
-		
-	
-endmodule
 	
 
 
@@ -746,8 +703,8 @@ module gamelogic(
 	p1_score,
 	p2_score,
 	winner,
-   pause,
-   powerup
+	pause,
+	powerup
 	);
 	
 	input clock50;
@@ -898,6 +855,48 @@ module gamelogic(
 		.speed_mod_x(speed_mod_x)
 		);
 
+endmodule
+
+module randomgen(
+	clk,
+	rand_x,
+	rand_y,
+	rand_val
+	);
+	
+	input clk;
+	wire cycles;
+	output[10:0] rand_x, rand_y, rand_val;
+	reg[10:0] rand_x, rand_y, rand_val, toggle;
+	
+	always @(posedge clk) begin
+		if(rand_val == 16) begin
+			rand_val = 1;
+		end
+		else begin
+			rand_val = rand_val + 1;
+		end
+		
+		if(rand_x >= `hc * (3/4) && toggle) begin
+			rand_x <= `hc * (1/4);
+		end
+		else if (toggle) begin
+			rand_x <= rand_x + rand_val;
+			toggle <= ~toggle;
+		end
+		
+		if(rand_y >= `vc) begin
+			toggle <= ~toggle;
+			rand_y <= 0;
+		end
+		else begin
+			rand_y <= rand_y + 4;
+		end
+	end
+	
+	//always @(negedge clk) begin
+		
+	
 endmodule
 
 
