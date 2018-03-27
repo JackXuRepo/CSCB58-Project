@@ -145,3 +145,12 @@ Bugs:
 - Experimented with ball colour changing, although the behaviour of colours
 are not as expected. (ball changes colour as it moves vertically)
 
+Week 3:
+Fixed:
+
+Added:
+- Graphics of "P1 Win" or "P2 Win" on screen when a player wins.
+
+Bugs:
+- Experiemented with randomly generated power ups displayed on screen, 
+(currently not working)
