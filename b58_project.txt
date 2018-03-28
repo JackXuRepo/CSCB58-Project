@@ -150,6 +150,8 @@ Fixed:
 
 Added:
 - Graphics of "P1 Win" or "P2 Win" on screen when a player wins.
+- LEDs now light up above the keys used for player control, this ensures that
+if key presses are not registered, the player is aware of it.
 
 Bugs:
 - Experiemented with randomly generated power ups displayed on screen, 
