@@ -44,16 +44,24 @@ THE SOFTWARE.
 `define batspeed    10
 `define gap         10
 
-// constants for our graphics
+// constants for our pause graphics
 `define pauseHeight       256
 `define pauseWidth        64
 `define pauseGap          32
+
+// constants for winning score graphics
 `define letterHeight      192
 `define letterWidth       48
 `define letterHeight2     144 // height for shorter pieces
-`define roofMargin	      144
+`define roofMargin        144
 `define pLetterHeight     190 // must be divisible by 5 to draw '2' correctly
 `define pLetterHeightSeg  38  // must be pLetterHeight / 5 and an integer to be valid
+
+// constants for our score display graphics
+`define scoreLongSeg           64
+`define scoreShortSeg          48 // if modified, must be == scoreLongSeg - scoreSegWidth
+`define scoreSegWidth          16 // if modified, must be == scoreLongSeg - scoreShortSeg
+
 
 // top level module of the program.
 module AirPong(
@@ -328,6 +336,9 @@ module graphics(
 					green <= 10'b1111111111;
 					blue <= 10'b0000000000;
 			end
+
+			// PAUSE GRAPHICS
+
 			// draw pause symbol when paused(pause condition is true)(left pause bar)
             else if (pause && x > `hc/2 - `pauseWidth - `pauseGap && x < `hc/2 - `pauseGap && y > `vc/2 - `pauseHeight/2 && y < `vc/2 + `pauseHeight/2) begin
 					red <= 10'b1111111111;
@@ -341,20 +352,20 @@ module graphics(
 					blue <= 10'b1111111111;
 			end
 			
+			// WINNING GRAPHICS
+
 			// draw the letter "W" for win. (bottom part)
 			else if (winner > 0 && x > `hc/2 - `letterWidth*6 && x < `hc/2 - `letterWidth && y > `roofMargin + `letterHeight2 && y < `roofMargin + `letterHeight) begin
 					red <= 10'b1111111111;
 					green <= 10'b1111111111;
 					blue <= 10'b1111111111;
 			end
-			
 			// draw the letter "W" for win. (left bar part)
 			else if (winner > 0 && x > `hc/2 - `letterWidth*6 && x < `hc/2 - `letterWidth*5 && y > `roofMargin && y < `roofMargin + `letterHeight2) begin
 					red <= 10'b1111111111;
 					green <= 10'b1111111111;
 					blue <= 10'b1111111111;
 			end
-			
 			// draw the letter "W" for win. (middle bar part)
 			else if (winner > 0 && x > `hc/2 - `letterWidth*4 && x < `hc/2 - `letterWidth*3 && y > `roofMargin && y < `roofMargin + `letterHeight2) begin
 					red <= 10'b1111111111;
@@ -367,104 +378,91 @@ module graphics(
 					green <= 10'b1111111111;
 					blue <= 10'b1111111111;
             end
-			
 			// draw the letter 'I' for win.
 			else if (winner > 0 && x > `hc/2 - `letterWidth/2 && x < `hc/2 + `letterWidth/2 && y > `roofMargin && y < `roofMargin + `letterHeight) begin
 					red <= 10'b1111111111;
 					green <= 10'b1111111111;
 					blue <= 10'b1111111111;
 			end
-
 			// draw the letter 'N' for win. (the left bar part)
 			else if (winner > 0 && x > `hc/2 + `letterWidth && x < `hc/2 + `letterWidth*2 && y > `roofMargin + `letterWidth && y < `roofMargin + `letterHeight) begin
 					red <= 10'b1111111111;
 					green <= 10'b1111111111;
 					blue <= 10'b1111111111;
 			end
-
 			// draw the letter 'N' for win. (the right bar part)
 			else if (winner > 0 && x > `hc/2 + `letterWidth*3 && x < `hc/2 + `letterWidth*4 && y > `roofMargin + `letterWidth && y < `roofMargin + `letterHeight) begin
 					red <= 10'b1111111111;
 					green <= 10'b1111111111;
 					blue <= 10'b1111111111;
 			end
-
 			// draw the letter 'N' for win. (the top bar part)
 			else if (winner > 0 && x > `hc/2 + `letterWidth && x < `hc/2 + `letterWidth*4 && y > `roofMargin && y < `roofMargin + `letterWidth) begin
 					red <= 10'b1111111111;
 					green <= 10'b1111111111;
 					blue <= 10'b1111111111;
 			end
-
 			// draw the number '2' for player 2 win. (the top bar part)
 			else if (winner == 2 && x > `hc/2 -`letterWidth*9 && x < `hc/2 - `letterWidth*7 && y > `roofMargin && y < `roofMargin + `pLetterHeightSeg) begin
 					red <= 10'b1111111111;
 					green <= 10'b1111111111;
 					blue <= 10'b1111111111;
 			end
-
 			// draw the number '2' for player 2 win. (right square part)
 			else if (winner == 2 && x > `hc/2 - `letterWidth*8 && x < `hc/2 - `letterWidth*7 && y > `roofMargin + `pLetterHeightSeg && y < `roofMargin + `pLetterHeightSeg*2) begin
 					red <= 10'b1111111111;
 					green <= 10'b1111111111;
 					blue <= 10'b1111111111;
 			end
-
 			// draw the number '2' for player 2 win. (middle bar part)
 			else if (winner == 2 && x > `hc/2 - `letterWidth*9 && x < `hc/2 - `letterWidth*7 && y > `roofMargin + `pLetterHeightSeg*2 && y < `roofMargin + `pLetterHeightSeg*3) begin
 					red <= 10'b1111111111;
 					green <= 10'b1111111111;
 					blue <= 10'b1111111111;
 			end
-
 			// draw the number '2' for player 2 win. (left square part)
 			else if (winner == 2 && x > `hc/2 - `letterWidth*9 && x < `hc/2 - `letterWidth*8 && y > `roofMargin + `pLetterHeightSeg*3 && y < `roofMargin + `pLetterHeightSeg*4) begin
 					red <= 10'b1111111111;
 					green <= 10'b1111111111;
 					blue <= 10'b1111111111;
 			end
-
 			// draw the number '2' for player 2 win. (bottom bar part)
 			else if (winner == 2 && x > `hc/2 - `letterWidth*9 && x < `hc/2 - `letterWidth*7 && y > `roofMargin + `pLetterHeightSeg*4 && y < `roofMargin + `pLetterHeightSeg*5) begin
 					red <= 10'b1111111111;
 					green <= 10'b1111111111;
 					blue <= 10'b1111111111;
 			end
-
 			// draw the number '1' for player 1 win.
 			else if (winner == 1 && x > `hc/2 - `letterWidth*9 && x < `hc/2 - `letterWidth*8 && y > `roofMargin && y < `roofMargin + `pLetterHeightSeg*5) begin
 					red <= 10'b1111111111;
 					green <= 10'b1111111111;
 					blue <= 10'b1111111111;	
 			end
-
 			// draw the letter 'P' for either player win. (left bar)
 			else if (winner > 0 && x > `hc/2 - `letterWidth*13 && x < `hc/2 - `letterWidth*12 && y > `roofMargin && y < `roofMargin + `pLetterHeightSeg*5) begin
 					red <= 10'b1111111111;
 					green <= 10'b1111111111;
 					blue <= 10'b1111111111;
 			end
-
 			// draw the letter 'P' for either player win. (top bar)
 			else if (winner > 0 && x > `hc/2 - `letterWidth*12 && x < `hc/2 - `letterWidth*10 && y > `roofMargin && y < `roofMargin + `pLetterHeightSeg) begin
 					red <= 10'b1111111111;
 					green <= 10'b1111111111;
 					blue <= 10'b1111111111;
 			end
-
 			// draw the letter 'P' for either player win. (right square)
 			else if (winner > 0 && x > `hc/2 - `letterWidth*11 && x < `hc/2 - `letterWidth*10 && y > `roofMargin + `pLetterHeightSeg && y < `roofMargin + `pLetterHeightSeg*2) begin
 					red <= 10'b1111111111;
 					green <= 10'b1111111111;
 					blue <= 10'b1111111111;
 			end
-
 			// draw the letter 'P' for either player win. (mid bar)
 			else if (winner > 0 && x > `hc/2 - `letterWidth*12 && x < `hc/2 - `letterWidth*10 && y > `roofMargin + `pLetterHeightSeg*2 && y < `roofMargin + `pLetterHeightSeg*3) begin
 					red <= 10'b1111111111;
 					green <= 10'b1111111111;
 					blue <= 10'b1111111111;
 			end
+
 
 			// black background
 			else begin
