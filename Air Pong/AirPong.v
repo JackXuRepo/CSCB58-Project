@@ -182,7 +182,6 @@ module AirPong(
         .powerup({SW[4], SW[3], SW[2], SW[1]})
 		);
 
-	// REPLACE THIS
 	// Module to output info to the seven-segment displays
 	sevenseg ss(
 		.seg0(HEX0),
@@ -479,7 +478,6 @@ module graphics(
 					green <= 10'b1111111111;
 					blue <= 10'b1111111111;
 			end
-
 			// draw the mid bar of the P1 score. (seg 6)
 			else if ((p1_score == 2 || p1_score == 3 || p1_score == 4 || p1_score == 5 || p1_score == 6 || p1_score == 8 || p1_score == 9 || p1_score == 10)
 				&& x > `hc/2 - `scoreLongSeg*3 && x < `hc/2 - `scoreLongSeg*2 - `scoreSegWidth && y > `vc - `scoreLongSeg*2 - `scoreSegHalf && y < `vc - `scoreLongSeg*2 + `scoreSegHalf) begin
@@ -487,7 +485,6 @@ module graphics(
 					green <= 10'b1111111111;
 					blue <= 10'b1111111111;
 			end
-
 			// draw the bottom bar of the P1 score. (seg 3)
 			else if ((p1_score == 0 || p1_score == 2 || p1_score == 3 || p1_score == 5 || p1_score == 6 || p1_score == 8)
 				&& x > `hc/2 - `scoreLongSeg*3 && x < `hc/2 - `scoreLongSeg*2 - `scoreSegWidth && y > `vc - `scoreLongSeg - `scoreSegWidth && y < `vc - `scoreLongSeg) begin
@@ -495,7 +492,6 @@ module graphics(
 					green <= 10'b1111111111;
 					blue <= 10'b1111111111;
 				end
-
 			// draw the left upper bar of the P1 score. (seg 5)
 			else if ((p1_score == 0 || p1_score == 4 || p1_score == 5 || p1_score == 6 || p1_score == 8 || p1_score == 9 || p1_score == 10)
 				&& x > `hc/2 - `scoreLongSeg*3 - `scoreSegWidth && x < `hc/2 - `scoreLongSeg*3 && y > `vc - `scoreLongSeg*3 && y < `vc - `scoreLongSeg*2) begin
@@ -503,7 +499,6 @@ module graphics(
 					green <= 10'b1111111111;
 					blue <= 10'b1111111111;
 				end
-
 			// draw the left lower bar of the P1 score. (seg 4)
 			else if ((p1_score == 0 || p1_score == 2 || p1_score == 6 || p1_score == 8 || p1_score == 10)
 				&& x > `hc/2 - `scoreLongSeg*3 - `scoreSegWidth && x < `hc/2 - `scoreLongSeg*3 && y > `vc - `scoreLongSeg*2 && y < `vc - `scoreLongSeg) begin
@@ -511,7 +506,6 @@ module graphics(
 					green <= 10'b1111111111;
 					blue <= 10'b1111111111;
 				end
-
 			// draw the right upper bar of the P1 score. (seg 1)
 			else if ((p1_score == 0 || p1_score == 1 || p1_score == 2 || p1_score == 3 || p1_score == 4 || p1_score == 7 || p1_score == 8 || p1_score == 9 || p1_score == 10)
 				&& x > `hc/2 - `scoreLongSeg*2 - `scoreSegWidth && x < `hc/2 - `scoreLongSeg*2 && y > `vc - `scoreLongSeg*3 && y < `vc - `scoreLongSeg*2) begin
@@ -519,7 +513,6 @@ module graphics(
 					green <= 10'b1111111111;
 					blue <= 10'b1111111111;
 				end
-
 			// draw the right lower bar of the P1 score. (seg 1)
 			else if ((p1_score == 0 || p1_score == 1 || p1_score == 3 || p1_score == 4 || p1_score == 5 || p1_score == 6 || p1_score == 7 || p1_score == 8 || p1_score == 9 || p1_score == 10)
 				&& x > `hc/2 - `scoreLongSeg*2 - `scoreSegWidth && x < `hc/2 - `scoreLongSeg*2 && y > `vc - `scoreLongSeg*2 && y < `vc - `scoreLongSeg) begin
@@ -527,7 +520,55 @@ module graphics(
 					green <= 10'b1111111111;
 					blue <= 10'b1111111111;
 				end
-
+			// draw the top bar of the P2 score. (seg 0)
+			else if ((p2_score == 0 || p2_score == 2 || p2_score == 3 || p2_score == 5 || p2_score == 6 || p2_score == 7 || p2_score == 8 || p2_score == 9 || p2_score == 10)
+				&& x > `hc/2 + `scoreLongSeg*2 + `scoreSegWidth && x < `hc/2 + `scoreLongSeg*3 && y > `vc - `scoreLongSeg*3 && y < `vc - `scoreLongSeg*3 + `scoreSegWidth) begin
+					red <= 10'b1111111111;
+					green <= 10'b1111111111;
+					blue <= 10'b1111111111;
+			end
+			// draw the mid bar of the P2 score. (seg 6)
+			else if ((p2_score == 2 || p2_score == 3 || p2_score == 4 || p2_score == 5 || p2_score == 6 || p2_score == 8 || p2_score == 9 || p2_score == 10)
+				&& x > `hc/2 + `scoreLongSeg*2 + `scoreSegWidth && x < `hc/2 + `scoreLongSeg*3 && y > `vc - `scoreLongSeg*2 - `scoreSegHalf && y < `vc - `scoreLongSeg*2 + `scoreSegHalf) begin
+					red <= 10'b1111111111;
+					green <= 10'b1111111111;
+					blue <= 10'b1111111111;
+			end
+			// draw the bottom bar of the P2 score. (seg 3)
+			else if ((p2_score == 0 || p2_score == 2 || p2_score == 3 || p2_score == 5 || p2_score == 6 || p2_score == 8)
+				&& x > `hc/2 + `scoreLongSeg*2 + `scoreSegWidth && x < `hc/2 + `scoreLongSeg*3 && y > `vc - `scoreLongSeg - `scoreSegWidth && y < `vc - `scoreLongSeg) begin
+					red <= 10'b1111111111;
+					green <= 10'b1111111111;
+					blue <= 10'b1111111111;
+				end
+			// draw the left upper bar of the P2 score. (seg 5)
+			else if ((p2_score == 0 || p2_score == 4 || p2_score == 5 || p2_score == 6 || p2_score == 8 || p2_score == 9 || p2_score == 10)
+				&& x > `hc/2 + `scoreLongSeg*2 && x < `hc/2 + `scoreLongSeg*2 + `scoreSegWidth && y > `vc - `scoreLongSeg*3 && y < `vc - `scoreLongSeg*2) begin
+					red <= 10'b1111111111;
+					green <= 10'b1111111111;
+					blue <= 10'b1111111111;
+				end
+			// draw the left lower bar of the P2 score. (seg 4)
+			else if ((p2_score == 0 || p2_score == 2 || p2_score == 6 || p2_score == 8 || p2_score == 10)
+				&& x > `hc/2 + `scoreLongSeg*2 && x < `hc/2 + `scoreLongSeg*2 + `scoreSegWidth && y > `vc - `scoreLongSeg*2 && y < `vc - `scoreLongSeg) begin
+					red <= 10'b1111111111;
+					green <= 10'b1111111111;
+					blue <= 10'b1111111111;
+				end
+			// draw the right upper bar of the P2 score. (seg 1)
+			else if ((p2_score == 0 || p2_score == 1 || p2_score == 2 || p2_score == 3 || p2_score == 4 || p2_score == 7 || p2_score == 8 || p2_score == 9 || p2_score == 10)
+				&& x > `hc/2 + `scoreLongSeg*3 && x < `hc/2 + `scoreLongSeg*3 + `scoreSegWidth && y > `vc - `scoreLongSeg*3 && y < `vc - `scoreLongSeg*2) begin
+					red <= 10'b1111111111;
+					green <= 10'b1111111111;
+					blue <= 10'b1111111111;
+				end
+			// draw the right lower bar of the P2 score. (seg 1)
+			else if ((p2_score == 0 || p2_score == 1 || p2_score == 3 || p2_score == 4 || p2_score == 5 || p2_score == 6 || p2_score == 7 || p2_score == 8 || p2_score == 9 || p2_score == 10)
+				&& x > `hc/2 + `scoreLongSeg*3 && x < `hc/2 + `scoreLongSeg*3 + `scoreSegWidth && y > `vc - `scoreLongSeg*2 && y < `vc - `scoreLongSeg) begin
+					red <= 10'b1111111111;
+					green <= 10'b1111111111;
+					blue <= 10'b1111111111;
+				end
 			// black background
 			else begin
 //					red <= 10'b0000011111;
