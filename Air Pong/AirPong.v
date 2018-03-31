@@ -482,11 +482,51 @@ module graphics(
 
 			// draw the mid bar of the P1 score. (seg 6)
 			else if ((p1_score == 2 || p1_score == 3 || p1_score == 4 || p1_score == 5 || p1_score == 6 || p1_score == 8 || p1_score == 9 || p1_score == 10)
-				&& x > `hc/2 - `scoreLongSeg*3 && x < `hc/2 - `scoreLongSeg*2 - `scoreSegWidth && y > `vc - `scoreLongSeg*3 - `scoreSegHalf && y < `vc - `scoreLongSeg*3 + `scoreSegHalf) begin
+				&& x > `hc/2 - `scoreLongSeg*3 && x < `hc/2 - `scoreLongSeg*2 - `scoreSegWidth && y > `vc - `scoreLongSeg*2 - `scoreSegHalf && y < `vc - `scoreLongSeg*2 + `scoreSegHalf) begin
 					red <= 10'b1111111111;
 					green <= 10'b1111111111;
 					blue <= 10'b1111111111;
 			end
+
+			// draw the bottom bar of the P1 score. (seg 3)
+			else if ((p1_score == 0 || p1_score == 2 || p1_score == 3 || p1_score == 5 || p1_score == 6 || p1_score == 8)
+				&& x > `hc/2 - `scoreLongSeg*3 && x < `hc/2 - `scoreLongSeg*2 - `scoreSegWidth && y > `vc - `scoreLongSeg - `scoreSegWidth && y < `vc - `scoreLongSeg) begin
+					red <= 10'b1111111111;
+					green <= 10'b1111111111;
+					blue <= 10'b1111111111;
+				end
+
+			// draw the left upper bar of the P1 score. (seg 5)
+			else if ((p1_score == 0 || p1_score == 4 || p1_score == 5 || p1_score == 6 || p1_score == 8 || p1_score == 9 || p1_score == 10)
+				&& x > `hc/2 - `scoreLongSeg*3 - `scoreSegWidth && x < `hc/2 - `scoreLongSeg*3 && y > `vc - `scoreLongSeg*3 && y < `vc - `scoreLongSeg*2) begin
+					red <= 10'b1111111111;
+					green <= 10'b1111111111;
+					blue <= 10'b1111111111;
+				end
+
+			// draw the left lower bar of the P1 score. (seg 4)
+			else if ((p1_score == 0 || p1_score == 2 || p1_score == 6 || p1_score == 8 || p1_score == 10)
+				&& x > `hc/2 - `scoreLongSeg*3 - `scoreSegWidth && x < `hc/2 - `scoreLongSeg*3 && y > `vc - `scoreLongSeg*2 && y < `vc - `scoreLongSeg) begin
+					red <= 10'b1111111111;
+					green <= 10'b1111111111;
+					blue <= 10'b1111111111;
+				end
+
+			// draw the right upper bar of the P1 score. (seg 1)
+			else if ((p1_score == 0 || p1_score == 1 || p1_score == 2 || p1_score == 3 || p1_score == 4 || p1_score == 7 || p1_score == 8 || p1_score == 9 || p1_score == 10)
+				&& x > `hc/2 - `scoreLongSeg*2 - `scoreSegWidth && x < `hc/2 - `scoreLongSeg*2 && y > `vc - `scoreLongSeg*3 && y < `vc - `scoreLongSeg*2) begin
+					red <= 10'b1111111111;
+					green <= 10'b1111111111;
+					blue <= 10'b1111111111;
+				end
+
+			// draw the right lower bar of the P1 score. (seg 1)
+			else if ((p1_score == 0 || p1_score == 1 || p1_score == 3 || p1_score == 4 || p1_score == 5 || p1_score == 6 || p1_score == 7 || p1_score == 8 || p1_score == 9 || p1_score == 10)
+				&& x > `hc/2 - `scoreLongSeg*2 - `scoreSegWidth && x < `hc/2 - `scoreLongSeg*2 && y > `vc - `scoreLongSeg*2 && y < `vc - `scoreLongSeg) begin
+					red <= 10'b1111111111;
+					green <= 10'b1111111111;
+					blue <= 10'b1111111111;
+				end
 
 			// black background
 			else begin
