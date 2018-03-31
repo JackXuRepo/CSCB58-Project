@@ -61,6 +61,7 @@ THE SOFTWARE.
 `define scoreLongSeg           64
 `define scoreShortSeg          48 // if modified, must be == scoreLongSeg - scoreSegWidth
 `define scoreSegWidth          16 // if modified, must be == scoreLongSeg - scoreShortSeg
+`define scoreSegHalf           8  // half of scoreSegWidth
 
 
 // top level module of the program.
@@ -154,7 +155,9 @@ module AirPong(
 		.vga_blank(VGA_BLANK),
         .pause(SW[0]),
 		.powerup({SW[4], SW[3], SW[2], SW[1]}),
-		.winner(winner)
+		.winner(winner),
+		.p1_score(p1_score),
+		.p2_score(p2_score)
 		);
 	
 	// Game logic module
@@ -228,7 +231,9 @@ module graphics(
 	vga_blank,
     pause,
 	powerup,
-	winner
+	winner,
+	p1_score,
+	p2_score
 	);
 
 	input clk;
@@ -237,6 +242,8 @@ module graphics(
 	input powerup;
     input pause;
     input [1:0] winner;
+    input [3:0] p1_score;
+    input [3:0] p2_score;
 	input [10:0] x, y, p1_y, p2_y, ball_x, ball_y;
 	output reg [9:0] red, green, blue;
 	output vga_blank;
@@ -463,6 +470,23 @@ module graphics(
 					blue <= 10'b1111111111;
 			end
 
+			// SCORE GRAPHICS - looks like a seven seg display, except on screen.
+
+			// draw the top bar of the P1 score. (seg 0)
+			else if ((p1_score == 0 || p1_score == 2 || p1_score == 3 || p1_score == 5 || p1_score == 6 || p1_score == 7 || p1_score == 8 || p1_score == 9 || p1_score == 10)
+				&& x > `hc/2 - `scoreLongSeg*3 && x < `hc/2 - `scoreLongSeg*2 - `scoreSegWidth && y > `vc - `scoreLongSeg*3 && y < `vc - `scoreLongSeg*3 + `scoreSegWidth) begin
+					red <= 10'b1111111111;
+					green <= 10'b1111111111;
+					blue <= 10'b1111111111;
+			end
+
+			// draw the mid bar of the P1 score. (seg 6)
+			else if ((p1_score == 2 || p1_score == 3 || p1_score == 4 || p1_score == 5 || p1_score == 6 || p1_score == 8 || p1_score == 9 || p1_score == 10)
+				&& x > `hc/2 - `scoreLongSeg*3 && x < `hc/2 - `scoreLongSeg*2 - `scoreSegWidth && y > `vc - `scoreLongSeg*3 - `scoreSegHalf && y < `vc - `scoreLongSeg*3 + `scoreSegHalf) begin
+					red <= 10'b1111111111;
+					green <= 10'b1111111111;
+					blue <= 10'b1111111111;
+			end
 
 			// black background
 			else begin
