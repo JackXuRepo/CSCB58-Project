@@ -700,14 +700,13 @@ module batpos(
 	reset,
 	speed,
 	value,
-	mode,
    pause
 	);
 
 	input clk;
 	input up, down;				// signal for counting up/down
 	input [4:0] speed;			// # of px to increment bats by
-	input reset, mode, pause;
+	input reset, pause;
 	output [10:0] value;		// max value is 1024 (px), 11 bits wide
 	
 	reg [10:0] value;
@@ -716,8 +715,8 @@ module batpos(
 		value <= `vc / 2;
 	end
 	
-	always @ (posedge clk or posedge reset or posedge mode) begin
-		if (reset || mode) begin
+	always @ (posedge clk or posedge reset) begin
+		if (reset) begin
 			// go back to the middle
 			value <= `vc / 2;
 		end
@@ -751,7 +750,6 @@ module ballpos(
 	dir_y,		// 0 = UP, 1 = DOWN
 	value_x,
 	value_y,
-	mode,
     pause,
     powerup,
 	speed_mod_x
@@ -759,7 +757,7 @@ module ballpos(
 
 	input clk;
 	input [4:0] speed;					// # of px to increment bat by
-	input reset, mode, pause, speed_mod_x;
+	input reset, pause, speed_mod_x;
 	input [3:0] powerup;
 	input dir_x, dir_y;
 	output [10:0] value_x, value_y;		// max value is 1024 (px), 11 bits wide
@@ -775,8 +773,8 @@ module ballpos(
 		value_y <= `va + 7;
 	end
 	
-	always @ (posedge clk or posedge reset or posedge mode) begin	
-		if (reset || mode) begin
+	always @ (posedge clk or posedge reset) begin	
+		if (reset) begin
 			value_x <= `hc / 2 - (`ballsize / 2);
 			value_y <= `va + 7;
 			multiplier_x <= 0;
