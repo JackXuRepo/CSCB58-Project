@@ -62,6 +62,7 @@ module AirPong(
 	VGA_SYNC,
 	TD_RESET,
 	LEDR,
+	LEDG,
 	HEX0,
 	HEX1,
 	HEX2,
@@ -78,6 +79,7 @@ module AirPong(
 	output VGA_CLK, VGA_BLANK, VGA_HS, VGA_VS, VGA_SYNC;
 	output TD_RESET;
 	output [17:0] LEDR;
+	output [8:0] LEDG;
 	output [6:0] HEX0, HEX1, HEX2, HEX3, HEX4, HEX5, HEX6, HEX7;
 
 	wire video_clock;
@@ -135,8 +137,8 @@ module AirPong(
 //		endcase
 //	end
 //	
-	hex_display test(powerup, HEX0);
-	hex_display test2(temp, HEX2);
+	//hex_display test(powerup, HEX0);
+	//hex_display test2(temp, HEX2);
 			
 	vga v(
 		.clk(video_clock),
@@ -204,14 +206,11 @@ module AirPong(
 		.rand_val(temp)
 		);
 	
-		
-		
-
 	// Module to output info to the seven-segment displays
 	sevenseg ss(
-		.seg0(LEDR[15]),
+		.seg0(HEX0),
 		.seg1(HEX1),
-		.seg2(LEDR[16]),
+		.seg2(HEX2),
 		.seg3(HEX3),
 		.seg4(HEX4),
 		.seg5(HEX5),
@@ -221,6 +220,19 @@ module AirPong(
 		.score_p2(p2_score),
 		.winner(winner)
 		);
+		
+	// lights LEDs in front of keys to confirm to user that their key input
+	// was received
+	buttonLights bl(
+		.p1_up_key(~KEY[3]),
+		.p1_down_key(~KEY[2]),
+		.p2_up_key(~KEY[1]),
+		.p2_down_key(~KEY[0]),
+		.p1_up_light(LEDG[6]),
+		.p1_down_light(LEDG[4]),
+		.p2_up_light(LEDG[2]),
+		.p2_down_light(LEDG[0])
+);
 
 endmodule
 
@@ -1323,4 +1335,26 @@ module hex_display(IN, OUT);
 		endcase
 
 	end
+endmodule
+
+
+module buttonLights(
+	p1_up_key,
+	p1_down_key,
+	p2_up_key,
+	p2_down_key,
+	p1_up_light,
+	p1_down_light,
+	p2_up_light,
+	p2_down_light
+	);
+	
+	input p1_up_key, p1_down_key, p2_up_key, p2_down_key;
+	output p1_up_light, p1_down_light, p2_up_light, p2_down_light;
+	
+	assign p1_up_light = p1_up_key;
+	assign p1_down_light = p1_down_key;
+	assign p2_up_light = p2_up_key;
+	assign p2_down_light = p2_down_key;
+	
 endmodule
