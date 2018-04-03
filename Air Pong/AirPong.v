@@ -614,13 +614,13 @@ module graphics(
 					blue <= 10'b0000000000;
 			end
 			// down indicator for p2 (right paddle, also blue.)
-			else if ((p2_move == 2'b01 || p2_move == 2'b11) && x > `hc/2 + `scoreLongSeg*2 && x < `hc/2 - `scoreLongSeg*3 && y > `vc - `scoreLongSeg/2 && y < `vc - `scoreLongSeg/2 + `scoreSegWidth) begin
+			else if ((p2_move == 2'b01 || p2_move == 2'b11) && x > `hc/2 + `scoreLongSeg*2 && x < `hc/2 + `scoreLongSeg*3 && y > `vc - `scoreLongSeg/2 && y < `vc - `scoreLongSeg/2 + `scoreSegWidth) begin
 					red <= 10'b0000000000;
 					green <= 10'b0000000000;
 					blue <= 10'b1111111111;
 			end
 			// down indicator for p2 (right paddle, also blue.)
-			else if ((p2_move == 2'b01 || p2_move == 2'b11) && x > `hc/2 + `scoreLongSeg*2 && x < `hc/2 - `scoreLongSeg*3 && y > `vc - `scoreLongSeg*7/2 && y < `vc - `scoreLongSeg*7/2 + `scoreSegWidth) begin
+			else if ((p2_move == 2'b01 || p2_move == 2'b11) && x > `hc/2 + `scoreLongSeg*2 && x < `hc/2 + `scoreLongSeg*3 && y > `vc - `scoreLongSeg*7/2 && y < `vc - `scoreLongSeg*7/2 + `scoreSegWidth) begin
 					red <= 10'b0000000000;
 					green <= 10'b0000000000;
 					blue <= 10'b1111111111;
@@ -700,13 +700,14 @@ module batpos(
 	reset,
 	speed,
 	value,
+	mode,
    pause
 	);
 
 	input clk;
 	input up, down;				// signal for counting up/down
 	input [4:0] speed;			// # of px to increment bats by
-	input reset, pause;
+	input reset, mode, pause;
 	output [10:0] value;		// max value is 1024 (px), 11 bits wide
 	
 	reg [10:0] value;
@@ -715,8 +716,8 @@ module batpos(
 		value <= `vc / 2;
 	end
 	
-	always @ (posedge clk or posedge reset) begin
-		if (reset) begin
+	always @ (posedge clk or posedge reset or posedge mode) begin
+		if (reset || mode) begin
 			// go back to the middle
 			value <= `vc / 2;
 		end
@@ -750,6 +751,7 @@ module ballpos(
 	dir_y,		// 0 = UP, 1 = DOWN
 	value_x,
 	value_y,
+	mode,
     pause,
     powerup,
 	speed_mod_x
@@ -757,7 +759,7 @@ module ballpos(
 
 	input clk;
 	input [4:0] speed;					// # of px to increment bat by
-	input reset, pause, speed_mod_x;
+	input reset, mode, pause, speed_mod_x;
 	input [3:0] powerup;
 	input dir_x, dir_y;
 	output [10:0] value_x, value_y;		// max value is 1024 (px), 11 bits wide
@@ -773,8 +775,8 @@ module ballpos(
 		value_y <= `va + 7;
 	end
 	
-	always @ (posedge clk or posedge reset) begin	
-		if (reset) begin
+	always @ (posedge clk or posedge reset or posedge mode) begin	
+		if (reset || mode) begin
 			value_x <= `hc / 2 - (`ballsize / 2);
 			value_y <= `va + 7;
 			multiplier_x <= 0;
