@@ -168,7 +168,9 @@ module AirPong(
 		.last_hit(last_hit),
 		.winner(winner),
 		.p1_score(p1_score),
-		.p2_score(p2_score)
+		.p2_score(p2_score),
+		.p1_move({~KEY[3], ~KEY[2]}),
+		.p2_move({~KEY[1], ~KEY[0]})
 		);
 	
 	// Game logic module
@@ -243,7 +245,9 @@ module graphics(
 	last_hit,
 	winner,
 	p1_score,
-	p2_score
+	p2_score,
+	p1_move,
+	p2_move
 	);
 
 	input clk;
@@ -255,6 +259,7 @@ module graphics(
     input [1:0] winner;
     input [3:0] p1_score;
     input [3:0] p2_score;
+    input [1:0] p1_move, p2_move;
 	input [10:0] x, y, p1_y, p2_y, ball_x, ball_y;
 	output reg [9:0] red, green, blue;
 	output vga_blank;
@@ -581,6 +586,33 @@ module graphics(
 					green <= 10'b1111111111;
 					blue <= 10'b1111111111;
 				end
+
+			// MOVEMENT INDICATOR GRAPHICS
+
+			// down indicator for p1 (left paddle, also red.)
+			else if ((p1_move == 2'b01 || p1_move == 2'b11) && x > `hc/2 - `scoreLongSeg*3 && x < `hc/2 - `scoreLongSeg*2 && y > `vc - `scoreLongSeg/2 && y < `vc - `scoreLongSeg/2 + `scoreSegWidth) begin
+					red <= 10'b1111111111;
+					green <= 10'b0000000000;
+					blue <= 10'b0000000000;
+			end
+			// up indicator for p1 (left paddle, also red.)
+			else if ((p1_move == 2'b10 || p1_move == 2'b11) && x > `hc/2 - `scoreLongSeg*3 && x < `hc/2 - `scoreLongSeg*2 && y > `vc - `scoreLongSeg*7/2 && y < `vc - `scoreLongSeg*7/2 + `scoreSegWidth) begin
+					red <= 10'b1111111111;
+					green <= 10'b0000000000;
+					blue <= 10'b0000000000;
+			end
+			// down indicator for p2 (right paddle, also blue.)
+			else if ((p2_move == 2'b01 || p2_move == 2'b11) && x > `hc/2 + `scoreLongSeg*2 && x < `hc/2 - `scoreLongSeg*3 && y > `vc - `scoreLongSeg/2 && y < `vc - `scoreLongSeg/2 + `scoreSegWidth) begin
+					red <= 10'b0000000000;
+					green <= 10'b0000000000;
+					blue <= 10'b1111111111;
+			end
+			// down indicator for p2 (right paddle, also blue.)
+			else if ((p2_move == 2'b01 || p2_move == 2'b11) && x > `hc/2 + `scoreLongSeg*2 && x < `hc/2 - `scoreLongSeg*3 && y > `vc - `scoreLongSeg*7/2 && y < `vc - `scoreLongSeg*7/2 + `scoreSegWidth) begin
+					red <= 10'b0000000000;
+					green <= 10'b0000000000;
+					blue <= 10'b1111111111;
+			end
 
 			// black background
 			else begin
