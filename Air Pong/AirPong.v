@@ -1,5 +1,3 @@
-// From: https://github.com/felixmo/Pong
-
 /*
 Pong clone for the Altera DE2.
 
@@ -43,17 +41,10 @@ THE SOFTWARE.
 `define batheight   128
 `define batspeed    10
 `define gap         10
-
-// constants for our graphics
-`define pauseHeight       256
-`define pauseWidth        64
-`define pauseGap          32
-`define letterHeight      192
-`define letterWidth       48
-`define letterHeight2     144 // height for shorter pieces
-`define roofMargin	      144
-`define pLetterHeight     190 // must be divisible by 5 to draw '2' correctly
-`define pLetterHeightSeg  38  // must be pLetterHeight / 5 and an integer to be valid
+`define pauseheight 256
+`define pausewidth  64
+`define pausegap    32
+`define powersize   15
 
 // top level module of the program.
 module AirPong(
@@ -71,7 +62,6 @@ module AirPong(
 	VGA_SYNC,
 	TD_RESET,
 	LEDR,
-    LEDG,
 	HEX0,
 	HEX1,
 	HEX2,
@@ -88,7 +78,6 @@ module AirPong(
 	output VGA_CLK, VGA_BLANK, VGA_HS, VGA_VS, VGA_SYNC;
 	output TD_RESET;
 	output [17:0] LEDR;
-	output [7:0] LEDG;
 	output [6:0] HEX0, HEX1, HEX2, HEX3, HEX4, HEX5, HEX6, HEX7;
 
 	wire video_clock;
@@ -111,14 +100,44 @@ module AirPong(
 	// Ball location
 	wire [10:0] ball_x;
 	wire [10:0] ball_y;
+	// Power up locations
+	wire [3:0] powerup;
+	wire [10:0] temp;
+	wire [3:0] last_hit;
+	//wire [10:0] random_power_y;
 
 	// Scores
 	wire [3:0] p1_score;
 	wire [3:0] p2_score;
-	wire [1:0] winner;				// 0 = none, 1 = P1, 2 = P2
+	wire [1:0] winner;
+	// 0 = none, 1 = P1, 2 = P2
 	assign LEDR[17] = (winner > 0);	// light up LEDR-17 to alert user to reset game
-
+	assign LEDR[7] = (last_hit == 0);
+	assign LEDR[8] = (last_hit == 1);
+	//assign powerup = {SW[4], SW[3], SW[2], SW[1]};
+	assign LEDR[0] = (powerup == 1);
+	assign LEDR[1] = (powerup == 2);
+	assign LEDR[3] = (powerup_x > 0); 
+	assign LEDR[4] = (powerup_y > 0);
 	// VGA output module
+	
+//	always @(*) begin
+//		case ({SW[4], SW[3], SW[2], SW[1]})
+//			4'b0001 : powerup <= 1;
+//			4'b0010 : powerup <= 2;
+//			4'b0011 : powerup <= 3;
+//			4'b0100 : powerup <= 4;
+//			4'b0101 : powerup <= 5;
+//			4'b0110 : powerup <= 6;
+//			4'b0111 : powerup <= 7;
+//			4'b1000 : powerup <= 8;
+//			default : powerup <= 0;
+//		endcase
+//	end
+//	
+	hex_display(powerup, HEX0);
+	hex_display(temp, HEX2);
+			
 	vga v(
 		.clk(video_clock),
 		.vsync(VGA_VS),
@@ -145,8 +164,8 @@ module AirPong(
 		.blue(VGA_B),
 		.vga_blank(VGA_BLANK),
         .pause(SW[0]),
-		.powerup({SW[4], SW[3], SW[2], SW[1]}),
-		.winner(winner)
+		.powerup(powerup),
+		.last_hit(last_hit)
 		);
 	
 	// Game logic module
@@ -167,16 +186,28 @@ module AirPong(
 		.p1_score(p1_score),
 		.p2_score(p2_score),
 		.winner(winner),
-        .pause(SW[0]),
-        .powerup({SW[4], SW[3], SW[2], SW[1]})
+      .pause(SW[0]),
+      .powerup(powerup),
+	  .last_hit(last_hit)
 		);
+	
+	// "Random generator"
+	randomgen rd(
+		.clk(CLOCK_50),
+		.rand_x(powerup_x),
+		.rand_y(powerup_y),
+		.rand_val(temp)
+		);
+	
+		
+		
 
 	// REPLACE THIS
 	// Module to output info to the seven-segment displays
 	sevenseg ss(
-		.seg0(HEX0),
+		.seg0(LEDR[15]),
 		.seg1(HEX1),
-		.seg2(HEX2),
+		.seg2(LEDR[16]),
 		.seg3(HEX3),
 		.seg4(HEX4),
 		.seg5(HEX5),
@@ -186,19 +217,6 @@ module AirPong(
 		.score_p2(p2_score),
 		.winner(winner)
 		);
-
-	// lights LEDs in front of keys to confirm to user that their key input
-	// was received
-	buttonLights bl(
-		.p1_up_key(~KEY[3]),
-		.p1_down_key(~KEY[2]),
-		.p2_up_key(~KEY[1]),
-		.p2_down_key(~KEY[0]),
-		.p1_up_light(LEDG[6]),
-		.p1_down_light(LEDG[4]),
-		.p2_up_light(LEDG[2]),
-		.p2_down_light(LEDG[0])
-	);
 
 endmodule
 
@@ -218,17 +236,17 @@ module graphics(
 	green, 
 	blue,
 	vga_blank,
-    pause,
+   pause,
 	powerup,
-	winner
+	last_hit
 	);
 
 	input clk;
 	input candraw;
 	input ball_on;
-	input powerup;
-    input pause;
-    input [1:0] winner;
+	input[3:0] powerup;
+   input pause;
+   input[3:0] last_hit;
 	input [10:0] x, y, p1_y, p2_y, ball_x, ball_y;
 	output reg [9:0] red, green, blue;
 	output vga_blank;
@@ -264,7 +282,7 @@ module graphics(
 //					green <= 10'b1000100000;
 //					blue <= 10'b0101101100;
 					
-					if(powerup == 4'b0010) begin
+					if(powerup == 4'b0010 || powerup == 2) begin
 						red <= 10'b1111111111;
 						green <= 10'b1111111111;
 						blue <= 10'b1111111111;
@@ -301,171 +319,83 @@ module graphics(
 //					blue <= 10'b0011111111;
 			end
 			// Draw upper left wall
-			else if (x < `batwidth && y > 0 && y < `vc/3) begin
+			else if ((x < `batwidth && y > 0 && y < `vc/3) && ((last_hit != 2 && powerup == 2) || powerup != 2)) begin
 					// pink wall
 					red <= 10'b1111111111;
 					green <= 10'b0000000000;
 					blue <= 10'b1111111111;
 			end
 			// Draw lower left wall
-			else if (x < `batwidth && y > (`vc/3 + `vc/3) && y < `vc) begin
+			else if (x < `batwidth && y > (`vc/3 + `vc/3) && y < `vc && ((last_hit != 2 && powerup == 2) || powerup != 2)) begin
 					// green wall
 					red <= 10'b0000000000;
 					green <= 10'b1111111111;
 					blue <= 10'b0000000000;
 			end
 			// Draw upper right wall
-			else if (x > `hc - `batwidth && y > 0 && y < `vc/3) begin
+			else if (x > `hc - `batwidth && y > 0 && y < `vc/3 && ((last_hit != 1 && powerup == 2) || powerup != 2)) begin
 					// pink wall
 					red <= 10'b1111111111;
 					green <= 10'b0000000000;
 					blue <= 10'b1111111111;
 			end
 			// Draw lower right wall
-			else if (x > `hc - `batwidth && y > (`vc/3 + `vc/3) && y < `vc) begin
+			else if (x > `hc - `batwidth && y > (`vc/3 + `vc/3) && y < `vc && ((last_hit != 1 && powerup == 2) || powerup != 2)) begin
 					// green wall
 					red <= 10'b0000000000;
 					green <= 10'b1111111111;
 					blue <= 10'b0000000000;
 			end
 			// draw pause symbol when paused(pause condition is true)(left pause bar)
-            else if (pause && x > `hc/2 - `pauseWidth - `pauseGap && x < `hc/2 - `pauseGap && y > `vc/2 - `pauseHeight/2 && y < `vc/2 + `pauseHeight/2) begin
+         else if (pause && x > `hc/2 - `pausewidth - `pausegap && x < `hc/2 - `pausegap && y > `vc/2 - `pauseheight/2 && y < `vc/2 + `pauseheight/2) begin
 					red <= 10'b1111111111;
 					green <= 10'b1111111111;
 					blue <= 10'b1111111111;
 			end
 			// draw pause symbol when paused(pause condition is true)(right pause bar)
-            else if (pause && x > `hc/2 + `pauseGap && x < `hc/2 + `pauseWidth + `pauseGap && y > `vc/2 - `pauseHeight/2 && y < `vc/2 + `pauseHeight/2) begin
+         else if (pause && x > `hc/2 + `pausegap && x < `hc/2 + `pausewidth + `pausegap && y > `vc/2 - `pauseheight/2 && y < `vc/2 + `pauseheight/2) begin
 					red <= 10'b1111111111;
 					green <= 10'b1111111111;
 					blue <= 10'b1111111111;
 			end
 			
-			// draw the letter "W" for win. (bottom part)
-			else if (winner > 0 && x > `hc/2 - `letterWidth*6 && x < `hc/2 - `letterWidth && y > `roofMargin + `letterHeight2 && y < `roofMargin + `letterHeight) begin
+			// draw power up square lower right
+			else if((x < 900 + `powersize && x > 900 - `powersize && y < 900 + `powersize && y > 900 - `powersize) && powerup != 1) begin
+					red <= 10'b0000000000;
+					green <= 10'b1111111111;
+					blue <= 10'b0000000000;
+			end
+			
+			// draw power up square lower left
+			else if((x < 380 + `powersize && x > 380 - `powersize && y < 900 + `powersize && y > 900 - `powersize) && powerup != 2) begin
+					red <= 10'b0000000000;
+					green <= 10'b1111111111;
+					blue <= 10'b0000000000;
+			end
+			
+			// draw power up square upper right
+			else if((x < 900 + `powersize && x > 900 - `powersize && y < 124 + `powersize && y > 124 - `powersize) && powerup != 3) begin
+					red <= 10'b0000000000;
+					green <= 10'b1111111111;
+					blue <= 10'b0000000000;
+			end
+			
+			// draw power up square upper left
+			else if((x < 380 + `powersize && x > 380 - `powersize && y < 124 + `powersize && y > 124 - `powersize) && powerup != 4) begin
+					red <= 10'b0000000000;
+					green <= 10'b1111111111;
+					blue <= 10'b0000000000;
+			end
+			
+			// draw middle line
+			else if((x < `hc/2 + 3 && x > `hc/2 - 3)) begin
 					red <= 10'b1111111111;
 					green <= 10'b1111111111;
 					blue <= 10'b1111111111;
 			end
 			
-			// draw the letter "W" for win. (left bar part)
-			else if (winner > 0 && x > `hc/2 - `letterWidth*6 && x < `hc/2 - `letterWidth*5 && y > `roofMargin && y < `roofMargin + `letterHeight2) begin
-					red <= 10'b1111111111;
-					green <= 10'b1111111111;
-					blue <= 10'b1111111111;
-			end
+			// draw score
 			
-			// draw the letter "W" for win. (middle bar part)
-			else if (winner > 0 && x > `hc/2 - `letterWidth*4 && x < `hc/2 - `letterWidth*3 && y > `roofMargin && y < `roofMargin + `letterHeight2) begin
-					red <= 10'b1111111111;
-					green <= 10'b1111111111;
-					blue <= 10'b1111111111;
-			end
-            // draw the letter "W" for win. (right bar part)
-            else if (winner > 0 && x > `hc/2 - `letterWidth*2 && x < `hc/2 - `letterWidth && y > `roofMargin && y < `roofMargin + `letterHeight2) begin
-					red <= 10'b1111111111;
-					green <= 10'b1111111111;
-					blue <= 10'b1111111111;
-            end
-			
-			// draw the letter 'I' for win.
-			else if (winner > 0 && x > `hc/2 - `letterWidth/2 && x < `hc/2 + `letterWidth/2 && y > `roofMargin && y < `roofMargin + `letterHeight) begin
-					red <= 10'b1111111111;
-					green <= 10'b1111111111;
-					blue <= 10'b1111111111;
-			end
-
-			// draw the letter 'N' for win. (the left bar part)
-			else if (winner > 0 && x > `hc/2 + `letterWidth && x < `hc/2 + `letterWidth*2 && y > `roofMargin + `letterWidth && y < `roofMargin + `letterHeight) begin
-					red <= 10'b1111111111;
-					green <= 10'b1111111111;
-					blue <= 10'b1111111111;
-			end
-
-			// draw the letter 'N' for win. (the right bar part)
-			else if (winner > 0 && x > `hc/2 + `letterWidth*3 && x < `hc/2 + `letterWidth*4 && y > `roofMargin + `letterWidth && y < `roofMargin + `letterHeight) begin
-					red <= 10'b1111111111;
-					green <= 10'b1111111111;
-					blue <= 10'b1111111111;
-			end
-
-			// draw the letter 'N' for win. (the top bar part)
-			else if (winner > 0 && x > `hc/2 + `letterWidth && x < `hc/2 + `letterWidth*4 && y > `roofMargin && y < `roofMargin + `letterWidth) begin
-					red <= 10'b1111111111;
-					green <= 10'b1111111111;
-					blue <= 10'b1111111111;
-			end
-
-			// draw the number '2' for player 2 win. (the top bar part)
-			else if (winner == 2 && x > `hc/2 -`letterWidth*9 && x < `hc/2 - `letterWidth*7 && y > `roofMargin && y < `roofMargin + `pLetterHeightSeg) begin
-					red <= 10'b1111111111;
-					green <= 10'b1111111111;
-					blue <= 10'b1111111111;
-			end
-
-			// draw the number '2' for player 2 win. (right square part)
-			else if (winner == 2 && x > `hc/2 - `letterWidth*8 && x < `hc/2 - `letterWidth*7 && y > `roofMargin + `pLetterHeightSeg && y < `roofMargin + `pLetterHeightSeg*2) begin
-					red <= 10'b1111111111;
-					green <= 10'b1111111111;
-					blue <= 10'b1111111111;
-			end
-
-			// draw the number '2' for player 2 win. (middle bar part)
-			else if (winner == 2 && x > `hc/2 - `letterWidth*9 && x < `hc/2 - `letterWidth*7 && y > `roofMargin + `pLetterHeightSeg*2 && y < `roofMargin + `pLetterHeightSeg*3) begin
-					red <= 10'b1111111111;
-					green <= 10'b1111111111;
-					blue <= 10'b1111111111;
-			end
-
-			// draw the number '2' for player 2 win. (left square part)
-			else if (winner == 2 && x > `hc/2 - `letterWidth*9 && x < `hc/2 - `letterWidth*8 && y > `roofMargin + `pLetterHeightSeg*3 && y < `roofMargin + `pLetterHeightSeg*4) begin
-					red <= 10'b1111111111;
-					green <= 10'b1111111111;
-					blue <= 10'b1111111111;
-			end
-
-			// draw the number '2' for player 2 win. (bottom bar part)
-			else if (winner == 2 && x > `hc/2 - `letterWidth*9 && x < `hc/2 - `letterWidth*7 && y > `roofMargin + `pLetterHeightSeg*4 && y < `roofMargin + `pLetterHeightSeg*5) begin
-					red <= 10'b1111111111;
-					green <= 10'b1111111111;
-					blue <= 10'b1111111111;
-			end
-
-			// draw the number '1' for player 1 win.
-			else if (winner == 1 && x > `hc/2 - `letterWidth*9 && x < `hc/2 - `letterWidth*8 && y > `roofMargin && y < `roofMargin + `pLetterHeightSeg*5) begin
-					red <= 10'b1111111111;
-					green <= 10'b1111111111;
-					blue <= 10'b1111111111;	
-			end
-
-			// draw the letter 'P' for either player win. (left bar)
-			else if (winner > 0 && x > `hc/2 - `letterWidth*13 && x < `hc/2 - `letterWidth*12 && y > `roofMargin && y < `roofMargin + `pLetterHeightSeg*5) begin
-					red <= 10'b1111111111;
-					green <= 10'b1111111111;
-					blue <= 10'b1111111111;
-			end
-
-			// draw the letter 'P' for either player win. (top bar)
-			else if (winner > 0 && x > `hc/2 - `letterWidth*12 && x < `hc/2 - `letterWidth*10 && y > `roofMargin && y < `roofMargin + `pLetterHeightSeg) begin
-					red <= 10'b1111111111;
-					green <= 10'b1111111111;
-					blue <= 10'b1111111111;
-			end
-
-			// draw the letter 'P' for either player win. (right square)
-			else if (winner > 0 && x > `hc/2 - `letterWidth*11 && x < `hc/2 - `letterWidth*10 && y > `roofMargin + `pLetterHeightSeg && y < `roofMargin + `pLetterHeightSeg*2) begin
-					red <= 10'b1111111111;
-					green <= 10'b1111111111;
-					blue <= 10'b1111111111;
-			end
-
-			// draw the letter 'P' for either player win. (mid bar)
-			else if (winner > 0 && x > `hc/2 - `letterWidth*12 && x < `hc/2 - `letterWidth*10 && y > `roofMargin + `pLetterHeightSeg*2 && y < `roofMargin + `pLetterHeightSeg*3) begin
-					red <= 10'b1111111111;
-					green <= 10'b1111111111;
-					blue <= 10'b1111111111;
-			end
-
 			// black background
 			else begin
 //					red <= 10'b0000011111;
@@ -534,7 +464,8 @@ module vga(
 		
 		startframe <= (h == 11'd0) && (v == 11'd0);
 	end
-endmodule 
+endmodule
+	
 
 
 // Counter for incrementing/decrementing bat position within bounds of screen
@@ -546,7 +477,7 @@ module batpos(
 	speed,
 	value,
 	mode,
-    pause
+   pause
 	);
 
 	input clk;
@@ -599,12 +530,13 @@ module ballpos(
 	mode,
     pause,
     powerup,
-	powerup_x
+	speed_mod_x
 	);
 
 	input clk;
 	input [4:0] speed;					// # of px to increment bat by
-	input reset, mode, pause, powerup, powerup_x;
+	input reset, mode, pause, speed_mod_x;
+	input [3:0] powerup;
 	input dir_x, dir_y;
 	output [10:0] value_x, value_y;		// max value is 1024 (px), 11 bits wide
 	
@@ -628,7 +560,7 @@ module ballpos(
 		end
 		else if (! pause) begin
 			// increment x
-			if(powerup == 4'b0001) begin
+			if(powerup == 1) begin
 				powermult_x = 10'b0000000011;
 				powermult_y = 10'b0000000011;
 			end
@@ -638,7 +570,7 @@ module ballpos(
 			end
 
 			// Increase horizontal speed
-			if(powerup_x == 1) begin
+			if(speed_mod_x == 1) begin
 				multiplier_x = 10'b0000000010;
 			end
 			else begin
@@ -682,14 +614,21 @@ module ballcollisions(
 	dir_x,
 	dir_y,
 	oob,// whether ball is out of bounds
-	wall_speed_x_active
+	wall_speed_x_active,
+	last_hit,
+	powerup
 	);
 	
 	input clk, reset;
 	input [10:0] p1_y, p2_y, ball_x, ball_y;
-	output dir_x, dir_y, oob, wall_speed_x_active;
+	output[3:0] powerup;
+	output dir_x, dir_y, oob, wall_speed_x_active
+	output[3:0] last_hit;
+	reg[3:0] track_hit;
 		
 	reg dir_x, dir_y, oob, wall_speed_x_active;
+	reg[3:0] last_hit;
+	reg[3:0] powerup;
 	initial begin
 		dir_x <= 0;
 		dir_y <= 1;
@@ -702,6 +641,9 @@ module ballcollisions(
 			dir_x <= ~dir_x;	// alternate starting direction every round
 			dir_y <= 1;
 			oob <= 0;
+			last_hit <= 0;
+			track_hit <= 1;
+			powerup <= 0;
 		end
 		else begin
 			// out of bounds (i.e. one of the players missed the ball)
@@ -716,13 +658,13 @@ module ballcollisions(
 			if (ball_y <= `va + 5) begin
 				dir_y = 1;
 			end
-			if (ball_y >= `vc - `ballsize) begin
+			if (ball_y >= `vc - 5) begin
 				dir_y = 0;
 			end
 			
 			// collision with P1 bat
 			if (ball_x <= `batwidth + `batwidth + `gap && ball_y + `ballsize >= p1_y && ball_y <= p1_y + `batheight) begin
-			
+				track_hit <= 1;
 				dir_x = 1;	// reverse direction
 				wall_speed_x_active = 1;
 				if (ball_y + `ballsize <= p1_y + (`batheight / 2)) begin
@@ -736,7 +678,7 @@ module ballcollisions(
 			end
 			// collision with P2 bat
 			else if (ball_x >= `hc - `batwidth - `batwidth- `gap -`ballsize && ball_y + `ballsize <= p2_y + `batheight && ball_y >= p2_y) begin
-				
+				track_hit <= 2;
 				dir_x = 0;	// reverse direction
 				wall_speed_x_active = 1;
 				if (ball_y + `ballsize <= p2_y + (`batheight / 2)) begin
@@ -749,7 +691,7 @@ module ballcollisions(
 				end
 			end
 			// collision with left upper wall
-			else if (ball_x <= `batwidth && ball_y + `ballsize <= `vc/3) begin
+			else if (ball_x <= `batwidth && ball_y + `ballsize <= `vc/3 && ((last_hit != 2 && powerup == 2) || powerup != 2)) begin
 			
 				dir_x = 1;	// reverse direction
 				wall_speed_x_active = 1;
@@ -763,7 +705,7 @@ module ballcollisions(
 				end
 			end
 			// collision with left lower wall
-			else if (ball_x <= `batwidth && ball_y + `ballsize <= `vc && ball_y + `ballsize >= `vc * 2/3) begin
+			else if (ball_x <= `batwidth && ball_y + `ballsize <= `vc && ball_y + `ballsize >= `vc * 2/3 && ((last_hit != 2 && powerup == 2) || powerup != 2)) begin
 			
 				dir_x = 1;	// reverse direction
 				wall_speed_x_active = 1;
@@ -777,7 +719,7 @@ module ballcollisions(
 				end
 			end
 			// collision with right upper wall
-			else if (ball_x + `ballsize >= `hc - `batwidth && ball_y + `ballsize <= `vc/3) begin
+			else if (ball_x + `ballsize >= `hc - `batwidth && ball_y + `ballsize <= `vc/3 && ((last_hit != 1 && powerup == 2) || powerup != 2)) begin
 			
 				dir_x = 0;	// reverse direction
 				wall_speed_x_active = 1;
@@ -791,7 +733,7 @@ module ballcollisions(
 				end
 			end
 			// collision with right lower wall
-			else if (ball_x + `ballsize >= `hc - `batwidth && ball_y + `ballsize <= `vc && ball_y + `ballsize >= `vc * 2/3) begin
+			else if (ball_x + `ballsize >= `hc - `batwidth && ball_y + `ballsize <= `vc && ball_y + `ballsize >= `vc * 2/3 && ((last_hit != 1 && powerup == 2) || powerup != 2)) begin
 			
 				dir_x = 0;	// reverse direction
 				wall_speed_x_active = 1;
@@ -803,6 +745,28 @@ module ballcollisions(
 					// collision with bottom half of p1 bat, go down
 					dir_y = 1;
 				end
+			end
+			
+			// COLLISION WITH POWER UPS			
+			// collision with power up square lower right
+			else if((ball_x + `ballsize < 900 + `powersize && ball_x + `ballsize > 900 - `powersize && ball_y + `ballsize < 900 + `powersize && ball_y + `ballsize > 900 - `powersize) && powerup != 1) begin
+				powerup = 1;
+			end
+			
+			// collision with power up square lower left
+			else if((ball_x + `ballsize < 380 + `powersize && ball_x + `ballsize > 380 - `powersize && ball_y + `ballsize < 900 + `powersize && ball_y + `ballsize > 900 - `powersize) && powerup != 2) begin
+				powerup <= 2;
+				last_hit <= track_hit;
+			end
+			
+			// collision with power up square upper right
+			else if((ball_x + `ballsize < 900 + `powersize && ball_x + `ballsize > 900 - `powersize && ball_y + `ballsize < 124 + `powersize && ball_y + `ballsize > 124 - `powersize) && powerup != 3) begin
+				powerup = 3;
+			end
+			
+			// collision with power up square upper left
+			else if((ball_x + `ballsize < 380 + `powersize && ball_x + `ballsize > 380 - `powersize && ball_y + `ballsize < 124 + `powersize && ball_y + `ballsize > 124 - `powersize) && powerup != 4) begin
+				powerup = 4;
 			end
 		end
 	end
@@ -828,8 +792,9 @@ module gamelogic(
 	p1_score,
 	p2_score,
 	winner,
-    pause,
-    powerup
+	pause,
+	powerup,
+	last_hit
 	);
 	
 	input clock50;
@@ -837,8 +802,8 @@ module gamelogic(
 	input video_clock;
 	input start;
 	input p1_up, p1_down, p2_up, p2_down;
-    input pause;
-    input powerup;
+   input pause;
+   output[3:0] powerup;
 	output [10:0] p1_y, p2_y;
 	output [10:0] ball_x, ball_y;
 	output ball_on;
@@ -863,9 +828,10 @@ module gamelogic(
 	
 	wire dir_x;		// 0 = LEFT, 1 = RIGHT
 	wire dir_y;		// 0 = UP, 1 = DOWN
-	wire powerup_x;
+	wire speed_mod_x;
 	wire outofbounds;
 	reg newround;
+	output[3:0] last_hit;
 	
 	reg [25:0] count_sec;
 	reg [1:0] count_secs;
@@ -961,7 +927,9 @@ module gamelogic(
 		.dir_x(dir_x),
 		.dir_y(dir_y),
 		.oob(outofbounds),
-		.wall_speed_x_active(powerup_x)
+		.wall_speed_x_active(speed_mod_x),
+		.last_hit(last_hit),
+		.powerup(powerup)
 		);
 	
 	// Module with counters that determining the ball position
@@ -975,9 +943,70 @@ module gamelogic(
 		.value_y(ball_y),
         .pause(pause),
         .powerup(powerup),
-		.powerup_x(powerup_x)
+		.speed_mod_x(speed_mod_x)
 		);
 
+endmodule
+
+module randomgen(
+	clk,
+	rand_x,
+	rand_y,
+	rand_val
+	);
+	
+	input clk;
+	reg[10:0] randomize;
+	reg[26:0] count_sec;
+	output[10:0] rand_x, rand_y, rand_val;
+	reg[10:0] rand_x, rand_y, rand_val;
+	
+	initial begin
+		rand_val <= 1;
+		rand_x<= `hc/2;
+		rand_y<= `vc/2;
+		randomize <= 0;
+	end
+	
+	always @(posedge clk) begin
+		if (count_sec == 26'd49_999_999) begin
+			count_sec = 26'd0;
+			randomize = 1;
+		end
+		else begin
+			// Increment every clock cycle
+			count_sec = count_sec + 1;
+		end
+	end
+	
+	always @(posedge clk && randomize) begin
+		if(rand_val == 16) begin
+			rand_val = 1;
+		end
+		else begin
+			rand_val = rand_val + 1;
+		end
+	end
+	
+	always @(posedge clk) begin
+		if(rand_x >= `hc * (3/4)) begin
+			rand_x = `hc * (1/4);
+		end
+		else begin
+			rand_x = rand_x + rand_val;
+		end
+	end
+	
+	always @(posedge clk) begin
+		if(rand_y >= `vc) begin
+			rand_y <= 0;
+		end
+		else begin
+			rand_y <= rand_y + 4;
+		end
+	end
+		
+	
 endmodule
 
 
@@ -1052,23 +1081,33 @@ module sevenseg(seg0, seg1, seg2, seg3, seg4, seg5, seg6, seg7, score_p1, score_
 
 endmodule
 
-module buttonLights(
-	p1_up_key,
-	p1_down_key,
-	p2_up_key,
-	p2_down_key,
-	p1_up_light,
-	p1_down_light,
-	p2_up_light,
-	p2_down_light
-	);
-	
-	input p1_up_key, p1_down_key, p2_up_key, p2_down_key;
-	output p1_up_light, p1_down_light, p2_up_light, p2_down_light;
-	
-	assign p1_up_light = p1_up_key;
-	assign p1_down_light = p1_down_key;
-	assign p2_up_light = p2_up_key;
-	assign p2_down_light = p2_down_key;
-	
+
+module hex_display(IN, OUT);
+    input [3:0] IN;
+	output reg [7:0] OUT;
+	 
+	always @(*)
+	begin
+		case(IN[3:0])
+			4'b0000: OUT = 7'b1000000;
+			4'b0001: OUT = 7'b1111001;
+			4'b0010: OUT = 7'b0100100;
+			4'b0011: OUT = 7'b0110000;
+			4'b0100: OUT = 7'b0011001;
+			4'b0101: OUT = 7'b0010010;
+			4'b0110: OUT = 7'b0000010;
+			4'b0111: OUT = 7'b1111000;
+			4'b1000: OUT = 7'b0000000;
+			4'b1001: OUT = 7'b0011000;
+			4'b1010: OUT = 7'b0001000;
+			4'b1011: OUT = 7'b0000011;
+			4'b1100: OUT = 7'b1000110;
+			4'b1101: OUT = 7'b0100001;
+			4'b1110: OUT = 7'b0000110;
+			4'b1111: OUT = 7'b0001110;
+			
+			default: OUT = 7'b0111111;
+		endcase
+
+	end
 endmodule
