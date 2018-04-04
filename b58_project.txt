@@ -1,4 +1,4 @@
-﻿CSCB58 Project File: Winter 2017
+﻿CSCB58 Project File: Winter 2018
 
 Team Member A
 -------------
@@ -33,7 +33,7 @@ time the ball comes into contact with a paddle, it accelerates at a rate. A
 counter will start counting down, when the game starts. Once time is over,
 the player with the most points wins.
 
-Video URL:
+Video URL: Included in project file uploaded to Markus
 
 Code URL: https://github.com/jfong701/CSCB58-Project
 
