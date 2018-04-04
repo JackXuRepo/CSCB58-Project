@@ -4,7 +4,7 @@ CSCB58 Winter 2018 UTSC
 By: Jason Fong, Jack Xu
 
 ## Acknowledgements
-This project contains code from:
+This project builds on code from:
 * [https://github.com/felixmo/Pong](https://github.com/felixmo/Pong) (MIT License)
 * [https://github.com/chiusin97525/Game-Console](https://github.com/chiusin97525/Game-Console) (unspecified, previous semester project)
 
