@@ -125,9 +125,10 @@ New this lab:
 - Added ball collision logic for the walls.
 
 Bugs:
-- Upper-right wall has a possible bug in the collision logic for the lower section. Ball passes through it sometimes.
+- Upper-right wall has a possible bug in the collision logic for the lower
+section. Ball passes through it sometimes.
 
-
+-------------------------------------------------------------------------------
 
 Week 2:
 Fixed:
@@ -145,6 +146,8 @@ Bugs:
 - Experimented with ball colour changing, although the behaviour of colours
 are not as expected. (ball changes colour as it moves vertically)
 
+-------------------------------------------------------------------------------
+
 Week 3:
 Fixed:
 
@@ -156,3 +159,17 @@ if key presses are not registered, the player is aware of it.
 Bugs:
 - Experiemented with randomly generated power ups displayed on screen, 
 (currently not working)
+
+-------------------------------------------------------------------------------
+
+Week 4 (Presentation):
+
+Fixed: Power up functionality, more detail in Added.
+
+Added:
+- Score graphics: Score of players are displayed on screen through VGA.
+- Power ups: Interact with game logic and graphics. Power up locations
+are on a fixed location on screen. Power ups are:
+	- turning the ball dark grey (invisiball)
+	- accelerating the ball speed (speed up)
+	- removing the opponents wall (remove_wall)
