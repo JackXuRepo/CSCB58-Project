@@ -1,6 +1,8 @@
 # Air Pong
 CSCB58 Winter 2018 UTSC
 
+![air pong](https://i.imgur.com/d23UkAH.png)
+
 By: Jason Fong, Jack Xu
 
 ## Acknowledgements
